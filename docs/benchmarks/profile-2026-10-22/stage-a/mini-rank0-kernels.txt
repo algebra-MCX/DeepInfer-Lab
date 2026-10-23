@@ -1,0 +1,39 @@
+kernels 27986  sum 1625.5 ms/step  busy 1625.3 ms/step  span 1661.6 ms/step
+
+== by category (ms/step, % of summed kernel time)
+    848.02   52.2%  elementwise_copy
+    240.88   14.8%  dequant
+    158.08    9.7%  dense_gemm
+     98.85    6.1%  attention
+     91.03    5.6%  comm
+     76.10    4.7%  other
+     67.26    4.1%  moe_gemm
+     42.90    2.6%  indexer
+      2.36    0.1%  hc_norm
+
+== top 25 kernels (ms/step, calls/step)
+    252.89    104.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, 
+    128.07    600.0  [dequant] _dequant_fp4_kernel
+     98.85    640.0  [attention] _sparse_attention
+     95.65   1144.0  [dequant] void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()
+     95.16   1405.0  [elementwise_copy] Memcpy DtoD (Device -> Device)
+     82.34   2003.0  [elementwise_copy] void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)
+     70.84    104.0  [elementwise_copy] void at::native::vectorized_elementwise_kernel<8, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Sc
+     66.97    120.0  [moe_gemm] _ZN7cutlass13device_kernelIN2at4cuda6detail25enable_3x_kernel_for_sm10INS_4gemm6kernel13GemmUniversalINS5_17GroupProblemShapeIN4cute5tupleIJiiiEEEEENS
+     59.01     40.0  [elementwise_copy] void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, long, long, long
+     56.84     88.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 64, 64>(at::native::(a
+     55.84     46.0  [elementwise_copy] void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     48.99     40.0  [dense_gemm] cutlass3x_sm100_simt_sgemm_f32_f32_f32_f32_f32_128x64x16_1x1x1_3_tnn_align1_bias_f32_relu
+     43.33     64.0  [dense_gemm] nvjet_sm100_tst_256x256_64x4_2x1_2cta_v_bz_TNT
+     42.50    104.0  [elementwise_copy] void at::native::reduce_kernel<128, 4, at::native::ReduceOp<c10::BFloat16, at::native::func_wrapper_t<c10::BFloat16, at::native::sum_functor<c10::BFlo
+     42.34     40.0  [comm] ncclDevKernel_ReduceScatter_Sum_f32_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     38.97     80.0  [other] _expand
+     35.32     42.0  [comm] ncclDevKernel_AllReduce_Sum_u64_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     34.17    608.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 2, 128, 1, 16,
+     28.62     80.0  [dense_gemm] void cutlass::Kernel2<cutlass_80_simt_sgemm_32x128_8x5_tn_align1>(cutlass_80_simt_sgemm_32x128_8x5_tn_align1::Params)
+     28.43     80.0  [other] _swiglu
+     23.33    640.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     20.23    162.0  [dense_gemm] nvjet_sm100_tst_128x256_64x6_2x1_2cta_v_bz_TNT
+     16.58     43.0  [elementwise_copy] void at::native::reduce_kernel<128, 4, at::native::ReduceOp<float, at::native::func_wrapper_t<float, at::native::sum_functor<float, float, float>::ope
+     14.05     40.0  [indexer] void at::native::sbtopk::gatherTopK<float, unsigned int, 2, false>(at::cuda::detail::TensorInfo<float const, unsigned int>, unsigned int, unsigned int
+     12.66     42.0  [comm] ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)

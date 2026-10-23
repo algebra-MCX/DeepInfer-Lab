@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minideepinfer"
+version = "0.1.0"
+description = "A minimal, readable re-implementation of DeepInfer's engine design, serving DeepSeek-V4.1 on one GPU"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "torch>=2.4",
+    "triton>=3.0",
+    "transformers>=4.43",
+    "safetensors",
+    "tokenizers",
+    "numpy",
+    "huggingface_hub",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "sympy", "tilelang", "pillow"]  # the reference implementation used by tests/test_v41.py
+
+[tool.setuptools.packages.find]
+include = ["minideepinfer*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["gpu: requires a CUDA GPU"]

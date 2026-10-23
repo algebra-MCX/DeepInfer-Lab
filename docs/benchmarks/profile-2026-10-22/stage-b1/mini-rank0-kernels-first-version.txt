@@ -1,0 +1,39 @@
+kernels 27122  sum 1219.0 ms/step  busy 1218.9 ms/step  span 1252.0 ms/step
+
+== by category (ms/step, % of summed kernel time)
+    507.68   41.6%  elementwise_copy
+    240.88   19.8%  dequant
+    114.71    9.4%  dense_gemm
+     98.86    8.1%  attention
+     74.21    6.1%  other
+     70.01    5.7%  comm
+     67.40    5.5%  moe_gemm
+     42.90    3.5%  indexer
+      2.36    0.2%  hc_norm
+
+== top 25 kernels (ms/step, calls/step)
+    128.08    600.0  [dequant] _dequant_fp4_kernel
+     98.86    640.0  [attention] _sparse_attention
+     95.65   1144.0  [dequant] void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()
+     93.11   1341.0  [elementwise_copy] Memcpy DtoD (Device -> Device)
+     82.35   2003.0  [elementwise_copy] void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)
+     67.11    120.0  [moe_gemm] _ZN7cutlass13device_kernelIN2at4cuda6detail25enable_3x_kernel_for_sm10INS_4gemm6kernel13GemmUniversalINS5_17GroupProblemShapeIN4cute5tupleIJiiiEEEEENS
+     59.01     40.0  [elementwise_copy] void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, long, long, long
+     56.85     88.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 64, 64>(at::native::(a
+     55.85     46.0  [elementwise_copy] void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     48.94     40.0  [dense_gemm] cutlass3x_sm100_simt_sgemm_f32_f32_f32_f32_f32_128x64x16_1x1x1_3_tnn_align1_bias_f32_relu
+     41.85     40.0  [comm] ncclDevKernel_ReduceScatter_Sum_f32_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     38.97     80.0  [other] _expand
+     34.22    608.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 2, 128, 1, 16,
+     28.61     80.0  [dense_gemm] void cutlass::Kernel2<cutlass_80_simt_sgemm_32x128_8x5_tn_align1>(cutlass_80_simt_sgemm_32x128_8x5_tn_align1::Params)
+     27.97      8.0  [elementwise_copy] _index_scores
+     26.54     80.0  [other] _swiglu
+     23.25    640.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     20.24    162.0  [dense_gemm] nvjet_sm100_tst_128x256_64x6_2x1_2cta_v_bz_TNT
+     16.57     43.0  [elementwise_copy] void at::native::reduce_kernel<128, 4, at::native::ReduceOp<float, at::native::func_wrapper_t<float, at::native::sum_functor<float, float, float>::ope
+     16.06     42.0  [comm] ncclDevKernel_AllReduce_Sum_u64_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     14.06     40.0  [indexer] void at::native::sbtopk::gatherTopK<float, unsigned int, 2, false>(at::cuda::detail::TensorInfo<float const, unsigned int>, unsigned int, unsigned int
+     12.11      9.0  [indexer] void at::native::mbtopk::gatherTopK<c10::BFloat16, unsigned int, 2>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, uns
+     12.04     18.0  [indexer] void at::native::mbtopk::computeBlockDigitCounts<c10::BFloat16, unsigned int, unsigned int, 2>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsig
+     11.35     42.0  [comm] ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     11.32     88.0  [dense_gemm] nvjet_sm100_tst_128x256_64x6_2x2_2cta_h_bz_TNT

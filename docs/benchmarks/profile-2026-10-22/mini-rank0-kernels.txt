@@ -1,0 +1,54 @@
+kernels 27986  sum 3803.7 ms/step  busy 3803.5 ms/step  span 3837.7 ms/step
+
+== by category (ms/step, % of summed kernel time)
+   2254.87   59.3%  attention
+    847.80   22.3%  elementwise_copy
+    240.90    6.3%  dequant
+    158.29    4.2%  dense_gemm
+    113.30    3.0%  comm
+     76.11    2.0%  other
+     67.18    1.8%  moe_gemm
+     42.88    1.1%  indexer
+      2.36    0.1%  hc_norm
+
+== top 40 kernels (ms/step, calls/step)
+   2254.87    640.0  [attention] _sparse_attention
+    252.90    104.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, 
+    128.10    600.0  [dequant] _dequant_fp4_kernel
+     95.68   1144.0  [dequant] void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()
+     95.39   1405.0  [elementwise_copy] Memcpy DtoD (Device -> Device)
+     82.25   2003.0  [elementwise_copy] void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)
+     70.84    104.0  [elementwise_copy] void at::native::vectorized_elementwise_kernel<8, at::native::(anonymous namespace)::launch_clamp_scalar(at::TensorIteratorBase&, c10::Scalar, c10::Sc
+     66.89    120.0  [moe_gemm] _ZN7cutlass13device_kernelIN2at4cuda6detail25enable_3x_kernel_for_sm10INS_4gemm6kernel13GemmUniversalINS5_17GroupProblemShapeIN4cute5tupleIJiiiEEEEENS
+     59.02     40.0  [elementwise_copy] void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, long, long, long
+     56.75     88.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 64, 64>(at::native::(a
+     55.84     46.0  [elementwise_copy] void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     49.36     40.0  [dense_gemm] cutlass3x_sm100_simt_sgemm_f32_f32_f32_f32_f32_128x64x16_1x1x1_3_tnn_align1_bias_f32_relu
+     48.42     42.0  [comm] ncclDevKernel_AllReduce_Sum_u64_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     43.30     64.0  [dense_gemm] nvjet_sm100_tst_256x256_64x4_2x1_2cta_v_bz_TNT
+     42.93     40.0  [comm] ncclDevKernel_ReduceScatter_Sum_f32_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     42.44    104.0  [elementwise_copy] void at::native::reduce_kernel<128, 4, at::native::ReduceOp<c10::BFloat16, at::native::func_wrapper_t<c10::BFloat16, at::native::sum_functor<c10::BFlo
+     38.96     80.0  [other] _expand
+     34.17    608.0  [elementwise_copy] void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 2, 128, 1, 16,
+     28.62     80.0  [dense_gemm] void cutlass::Kernel2<cutlass_80_simt_sgemm_32x128_8x5_tn_align1>(cutlass_80_simt_sgemm_32x128_8x5_tn_align1::Params)
+     28.44     80.0  [other] _swiglu
+     23.23    640.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator
+     21.22     42.0  [comm] ncclDevKernel_AllGather_RING_LL(ncclDevKernelArgsStorage<4096ul>)
+     20.16    162.0  [dense_gemm] nvjet_sm100_tst_128x256_64x6_2x1_2cta_v_bz_TNT
+     16.46     43.0  [elementwise_copy] void at::native::reduce_kernel<128, 4, at::native::ReduceOp<float, at::native::func_wrapper_t<float, at::native::sum_functor<float, float, float>::ope
+     14.06     40.0  [indexer] void at::native::sbtopk::gatherTopK<float, unsigned int, 2, false>(at::cuda::detail::TensorInfo<float const, unsigned int>, unsigned int, unsigned int
+     12.10      9.0  [indexer] void at::native::mbtopk::gatherTopK<c10::BFloat16, unsigned int, 2>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, uns
+     12.04     18.0  [indexer] void at::native::mbtopk::computeBlockDigitCounts<c10::BFloat16, unsigned int, unsigned int, 2>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsig
+     11.25     88.0  [dense_gemm] nvjet_sm100_tst_128x256_64x6_2x2_2cta_h_bz_TNT
+      8.45     81.0  [other] _collapse
+      7.75     84.0  [elementwise_copy] void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBas
+      7.51    330.0  [dequant] _dequant_fp8_kernel
+      6.52     80.0  [dequant] _fp8_fake_quant_kernel
+      6.11     21.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespace)::CompareFunctor<long> >(at::TensorIte
+      5.92     84.0  [elementwise_copy] void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::n
+      5.34    140.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::op
+      4.03     13.0  [elementwise_copy] void at::native::vectorized_elementwise_kernel<8, at::native::(anonymous namespace)::masked_fill_kernel(at::TensorIterator&, c10::Scalar const&)::{lam
+      3.67      1.0  [elementwise_copy] void at::native::reduce_kernel<512, 1, at::native::ReduceOp<c10::BFloat16, at::native::func_wrapper_t<c10::BFloat16, at::native::MaxNanFunctor<c10::BF
+      3.28     41.0  [elementwise_copy] void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()
+      2.76     40.0  [dequant] void at::native::unrolled_elementwise_kernel<at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>, 4, TrivialOffsetCalculator<2, unsigned int>, 
+      2.55     88.0  [elementwise_copy] void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::complex<float>, c10::complex<float>, c10

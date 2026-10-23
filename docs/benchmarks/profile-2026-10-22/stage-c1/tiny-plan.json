@@ -1,0 +1,24 @@
+{
+  "suite": "tiny",
+  "runs": 3,
+  "harness": "current",
+  "harness_sha": "e29f91b1750585f5a49ba3b369d6e9eb30c85eba",
+  "harness_dirty": false,
+  "created_at": "2026-10-22T16:55:37.099987+00:00",
+  "revisions": [
+    {
+      "rev": "perf/fused-index-scores",
+      "sha": "32e2b5b9fc5ae7a2fe40509e666aa993d775ac04",
+      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/32e2b5b9fc5a",
+      "extra": [],
+      "harness": "/workspace/mdi-experiments/bench-rev-tiny-c1/harness"
+    },
+    {
+      "rev": "perf/moe-combine",
+      "sha": "5f5fb730728bc086ed06a486f22fe5340d559ba4",
+      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/5f5fb730728b",
+      "extra": [],
+      "harness": "/workspace/mdi-experiments/bench-rev-tiny-c1/harness"
+    }
+  ]
+}

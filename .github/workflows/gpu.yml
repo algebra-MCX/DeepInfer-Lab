@@ -1,0 +1,48 @@
+name: GPU CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or commit to test"
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test-gpu:
+    name: gpu
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Check CUDA
+        run: |
+          python - <<'PY'
+          import torch
+
+          assert torch.cuda.is_available(), "GPU runner has no usable CUDA device"
+          print("torch:", torch.__version__)
+          print("cuda runtime:", torch.version.cuda)
+          print("device count:", torch.cuda.device_count())
+          for i in range(torch.cuda.device_count()):
+              print(f"device {i}:", torch.cuda.get_device_name(i))
+          PY
+      - name: Run full test suite
+        run: pytest -q -rs
+      - name: Compile and check whitespace
+        run: |
+          python -m compileall -q minideepinfer tests tools examples bench.py
+          git diff --check

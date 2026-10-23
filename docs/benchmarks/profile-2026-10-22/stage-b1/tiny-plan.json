@@ -1,0 +1,24 @@
+{
+  "suite": "tiny",
+  "runs": 3,
+  "harness": "current",
+  "harness_sha": "f759f32196ff647c2be52958c52eb734828eb4c9",
+  "harness_dirty": false,
+  "created_at": "2026-10-22T16:46:16.889936+00:00",
+  "revisions": [
+    {
+      "rev": "perf/tensor-core-sparse-attention",
+      "sha": "f759f32196ff647c2be52958c52eb734828eb4c9",
+      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/f759f32196ff",
+      "extra": [],
+      "harness": "/workspace/mdi-experiments/bench-rev-tiny-2/harness"
+    },
+    {
+      "rev": "perf/fused-index-scores",
+      "sha": "1868b01b328cbac48b734555422b61cf1c70f4be",
+      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/1868b01b328c",
+      "extra": [],
+      "harness": "/workspace/mdi-experiments/bench-rev-tiny-2/harness"
+    }
+  ]
+}
