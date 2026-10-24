@@ -146,4 +146,4 @@ GPU 和官方 reference 测试需要可用的 CUDA 环境；没有 GPU 时应运
 - DSpark 投机解码、prefill 成本模型和端到端 batch-invariant 仍在路线图中；
 - 随机权重 checkpoint 只能验证执行语义，不能证明 DeepSeek-V4.1 的任务质量或生产吞吐。
 
-相关路线图、许可和第三方声明见 [README](../README.md) 与 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES)。
+相关路线图、许可和第三方声明见 [README](../README.zh-CN.md) 与 [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES)。
