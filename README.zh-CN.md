@@ -1,5 +1,7 @@
 <h1 align="center">mini-DeepInfer</h1>
 
+> **项目近况（2026-10-25）：** 这个项目会持续更新。近日身体有些不适，我先休息几天。为了保持本仓库提交历史的整洁，我已将大部分个人优化代码放到私有仓库中。项目仍会继续推进，短暂休息后会恢复公开仓库的更新。感谢大家的理解与支持。
+
 <p align="center">
   <a href="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
   <a href="README.md">English</a> · 简体中文

@@ -1,5 +1,7 @@
 <h1 align="center">mini-DeepInfer</h1>
 
+> **Project update (2026-10-25):** This project will continue to receive updates. I've been feeling unwell recently, so I'm taking a few days off. To keep this repository's commit history clean, I've moved most of my personal optimization code to a private repository. Development will continue, and updates to this public repository will resume after this short break. Thank you for your patience and support.
+
 <p align="center">
   <a href="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
   English · <a href="README.zh-CN.md">简体中文</a>
