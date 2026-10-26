@@ -1,14 +1,6 @@
 <h1 align="center">DeepInfer-Lab</h1>
 
-**DeepInfer-Lab's core goal is to investigate how each DeepInfer component affects the inference engine as a whole, and to quantify that impact.** To me, the most valuable part of this project is the complete, public optimization process. In the [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues), you can follow every optimization: the problem I encountered, my design reasoning, the solution, and the final end-to-end (E2E) tests on real **4×B200 hardware**. Currently, only **DeepSeek-V4.1-Flash** is supported, and experiments focus on **Prefill**, connecting component analysis with hardware measurements to understand the effect on the whole engine.
-
-I am also a **vLLM contributor**, with two PRs in **Model Runner V2 (MRV2)** merged into the main branch ([#63372](https://github.com/vllm-project/vllm/pull/63372), [#63476](https://github.com/vllm-project/vllm/pull/63476)), and recently launched the **vLLM Promotion Challenge** (see [my Xiaohongshu profile](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800) for details). I have a good relationship with the **Inferact** team. If the project gains traction, I will pursue a collaboration with Inferact and seek access to a **64-GPU SM100 cluster** for **Decode optimization**.
-
-If you would like to contribute, please contact me through [my personal profile](https://github.com/algebra-MCX). If you want to learn the reasoning behind each DeepInfer module's optimizations, including **how DeepGEMM, DeepEP, and FlashMLA are designed to work together within DeepInfer**, please **Star, Fork, and share this repository**.
-
-**Once the repository exceeds 2,000 Stars and 100 Forks, I will actively reach out to Inferact, seek cluster resources, and work to complete the crucial Decode optimizations.** Your participation and enthusiasm will give me the confidence to pursue an official collaboration.
-
-> **Project update (2026-10-25):** This project will continue to receive updates. I've been feeling unwell recently, so I'm taking a few days off. To keep this repository's commit history clean, I've moved most of my personal optimization code to a private repository. Development will continue, and updates to this public repository will resume after this short break. Thank you for your patience and support.
+<p align="center"><strong>Rebuilding Inference Systems from First Principles</strong></p>
 
 <p align="center">
   <a href="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
@@ -19,13 +11,44 @@ If you would like to contribute, please contact me through [my personal profile]
   <img src="docs/assets/deepinfer-lab-mark.png" width="320" alt="DeepInfer-Lab abstract inference mark">
 </p>
 
-> A DeepSeek-V4.1 runtime you can read: follow a request from the queue to its next sampled token.
+**DeepInfer-Lab is an open experimental project for rediscovering how high-performance inference systems are designed.**
+Starting from a simple, correct runtime, I progressively rebuild the core components of
+[DeepInfer](https://github.com/deepseek-ai/DeepInfer) and investigate why each design decision becomes necessary,
+which bottleneck it solves, and how it changes the system as a whole.
 
-**Read [DeepInfer](https://github.com/deepseek-ai/DeepInfer) in ~2,000 lines of PyTorch.** DeepInfer serves
-DeepSeek-V4.1-Flash on dozens of GPUs with a C++ scheduler, EP/DP/CP parallelism and custom kernels; it is hard to
-read and needs SM100 hardware. DeepInfer-Lab keeps the engine design that makes it distinctive and drops the scale:
-the full V4.1 architecture runs on a single GPU, the real V4.1-Flash runs on 4 B200s, and every step of a request
-can be followed and changed.
+The goal is to reconstruct the design process through experiments: understand where every improvement comes from,
+explain the remaining performance gap, and explore whether a different design could work better.
+
+## Experimental method
+
+Every optimization should answer four questions:
+
+| Question | What the experiment should explain |
+| --- | --- |
+| **Why?** | Which compute, memory, communication or scheduling bottleneck motivates the change? |
+| **How?** | What changes in the algorithm, data layout, kernel or runtime, and why should it help? |
+| **Performance?** | What happens to kernel time, end-to-end throughput, latency and memory use? |
+| **Trade-offs?** | Under which workloads and hardware conditions does it help or hurt, and what does it cost? |
+
+Each iteration starts with a correct baseline and a profile, then tests a specific design hypothesis. After the change,
+I check correctness, measure both kernel and end-to-end performance, and profile again to find the next bottleneck.
+**A faster kernel can move the bottleneck elsewhere.** Attention, GEMM, communication, state management and runtime
+scheduling must therefore be studied together inside a working inference engine.
+
+The experiment record is part of the project: the motivation, implementation choices, correctness checks, benchmark
+configuration, profiles, results and unsuccessful attempts. Follow the [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues),
+[performance reports](docs/perf-reports/) and [benchmark data](docs/benchmarks/) to reproduce, verify and challenge the findings.
+Future experiments will follow the same approach, including publishing negative results and open questions.
+
+## Current focus
+
+- **Model:** DeepSeek-V4.1-Flash. The runtime includes the full V4.1 architecture; the tiny random checkpoint provides
+  a smaller development and correctness-testing setup.
+- **Measurement:** real-model **prefill on 4 × NVIDIA B200**. The prefill research will keep this GPU configuration
+  fixed, matching the official benchmark's GPU configuration, to study gains from algorithms, kernels and system design.
+  Workload and measurement details are stated with each result.
+- **Implementation:** a readable runtime that can be inspected, changed and measured at every step. It grows as the
+  experiments require; the research is organized around design questions and measured effects.
 
 ## Quick start
 
@@ -43,6 +66,12 @@ uv run examples/offline_inference.py
 
 ## Key results
 
+- **A measured optimization history on fixed hardware:** prefill throughput increased from **1,084.8 to 4,315.9
+  tok/s/GPU (3.98×)** across the documented 4 × B200 optimization rounds. This is the improvement over this project's
+  own baseline; the comparison with official DeepInfer is reported separately below. Follow
+  [report A](docs/perf-reports/A-tensor-core-sparse-attention.md),
+  [report B1](docs/perf-reports/B1-fused-index-scores.md) and
+  [report C1](docs/perf-reports/C1-moe-combine.md) for the design decisions and changing bottlenecks.
 - **The real DeepSeek-V4.1-Flash on 4 × B200, benchmarked the way DeepInfer benchmarks itself.** EP4 × DP4, 131k
   context; request counts, warm-up and measurement windows and metrics match the official `run_sweep.sh prefill`,
   and the plot comes straight out of the official `plot_pareto.py`. The parallel layer is ~40 lines
@@ -249,6 +278,21 @@ There is no CPU path for model execution. Check the license of a real checkpoint
 
 ## Roadmap
 
+### Core kernel research (planned)
+
+I plan to reimplement **FlashMLA, DeepGEMM and DeepEP from scratch**, starting with simple, correct research
+implementations and integrating them into the runtime one component at a time. Each stage will be profiled,
+optimized and evaluated at both kernel and end-to-end levels.
+
+- [ ] **FlashMLA:** investigate attention data movement, KV access and tiling, and measure how they affect the full attention path.
+- [ ] **DeepGEMM:** investigate low-precision GEMM, grouped expert computation and data preparation, including numerical and memory costs.
+- [ ] **DeepEP:** investigate expert dispatch/combine, communication and overlap with computation inside the MoE execution path.
+
+These are future research directions. The existing kernels and validated runtime capabilities are described above;
+rebuilding these components will produce additional experiments and comparisons.
+
+### Runtime and model milestones
+
 - [x] DeepSeek-V4.1 model and an official-reference regression suite
 - [x] Paged blocks + state slots, chunked prefill, preemption, ZOS, deterministic sampling
 - [x] Real V4.1-Flash on multiple GPUs with EP × DP, prefill benchmarked the official way
@@ -259,6 +303,26 @@ There is no CPU path for model execution. Check the license of a real checkpoint
 - [ ] Cost-model prefill chunking (DeepInfer Q&A)
 - [ ] End-to-end batch-invariant inference
 - [ ] Image input (V4.1 ships a ViT; the checkpoint already contains the vision weights)
+
+## Contributing and discussion
+
+Feedback, design critiques, profiling investigations, reproducibility checks and code contributions are welcome.
+I'd also like to organize informal technical study sessions around architecture, kernels, measurements and trade-offs.
+You can start with the [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues) or contact me through
+[my GitHub profile](https://github.com/algebra-MCX).
+
+I also contribute to vLLM's Model Runner V2 ([#63372](https://github.com/vllm-project/vllm/pull/63372),
+[#63476](https://github.com/vllm-project/vllm/pull/63476)) and share updates about my vLLM Promotion Challenge on
+[Xiaohongshu](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800).
+
+### Future collaboration and decode research
+
+With enough community interest, I'd like to explore a collaboration with the **Inferact team** and seek access to
+additional GPU nodes, ideally a **64-GPU SM100 cluster**, to extend the research into decode optimization.
+Collaboration and cluster access are future possibilities; this is currently an independent educational and experimental project.
+Prefill research will continue on the fixed 4 × B200 setup.
+
+> **Project update (2026-10-25):** This project will continue to receive updates. I've been feeling unwell recently, so I'm taking a few days off. To keep this repository's commit history clean, I've moved most of my personal optimization code to a private repository. Development will continue, and updates to this public repository will resume after this short break. Thank you for your patience and support.
 
 ## License
 

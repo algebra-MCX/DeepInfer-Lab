@@ -1,14 +1,6 @@
 <h1 align="center">DeepInfer-Lab</h1>
 
-**DeepInfer-Lab 的核心目标，是探究 DeepInfer 各个组件对整个推理引擎的影响，并进行量化分析。** 对我而言，项目最珍贵的部分就是完整、公开的优化过程：在 [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues) 中，你可以看到我的每一项优化，包括遇到了什么问题、设计思路是什么、采取了哪些解决措施，以及最终在真实 **4×B200** 上的端到端（E2E）真机测试。当前仅支持 **DeepSeek-V4.1-Flash**，实验聚焦 **Prefill**，通过组件分析与整机测试理解每项优化对引擎整体表现的影响。
-
-我也是 **vLLM 贡献者**，在 **Model Runner V2（MRV2）** 的两个 PR 已合入主线（[#63372](https://github.com/vllm-project/vllm/pull/63372)、[#63476](https://github.com/vllm-project/vllm/pull/63476)），最近发起了「**vLLM 晋升挑战**」（详情见[我的小红书主页](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)），并与 **Inferact** 团队保持着良好的关系。如果项目反响良好，我会积极寻求与 Inferact 合作，争取借用 **64 张 SM100 GPU 的集群**，进一步开展 **Decode 优化**。
-
-如果你也想参与项目，欢迎通过[我的个人主页](https://github.com/algebra-MCX)与我联系。如果你想学习 DeepInfer 各个模块的优化核心思路，了解 **DeepGEMM、DeepEP、FlashMLA 如何在 DeepInfer 中协同设计**，欢迎 **Star、Fork 并分享本仓库**。
-
-**当仓库突破 2,000 Stars 和 100 Forks，我会积极与 Inferact 联系，争取集群资源并完成最重要的 Decode 优化。** 你的参与和热情，将是我寻求官方合作的最大底气。
-
-> **项目近况（2026-10-25）：** 这个项目会持续更新。近日身体有些不适，我先休息几天。为了保持本仓库提交历史的整洁，我已将大部分个人优化代码放到私有仓库中。项目仍会继续推进，短暂休息后会恢复公开仓库的更新。感谢大家的理解与支持。
+<p align="center"><strong>从第一性原理重建推理系统</strong></p>
 
 <p align="center">
   <a href="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
@@ -19,12 +11,40 @@
   <img src="docs/assets/deepinfer-lab-mark.png" width="320" alt="DeepInfer-Lab 抽象推理徽标">
 </p>
 
-> 一个可以读懂的 DeepSeek-V4.1 运行时：从请求入队一路跟到下一个采样 token。
+**DeepInfer-Lab 是一个通过实验重走高性能推理系统设计过程的开放项目。**
+我从简单、正确的运行时出发，逐步重建 [DeepInfer](https://github.com/deepseek-ai/DeepInfer) 的核心组件，
+研究每项设计为什么会成为必要、解决了什么瓶颈，以及它怎样影响整个系统。
 
-**用约 2,000 行 PyTorch 读懂 [DeepInfer](https://github.com/deepseek-ai/DeepInfer)。** DeepInfer 在几十张 GPU 上服务
-DeepSeek-V4.1-Flash，靠 C++ 调度器、EP/DP/CP 并行和定制 kernel，代码难读，也需要 SM100 才能运行。DeepInfer-Lab
-保留它最有特色的引擎设计，去掉规模相关的部分：单张 GPU 就能跑完整的 V4.1 架构，4 张 B200 能跑真实的 V4.1-Flash，
-请求的每一步都可以跟踪和修改。
+项目的目标是通过实验还原设计过程：解释每一次性能提升来自哪里、剩余差距在哪里，
+并探索有没有不同、甚至更好的设计。
+
+## 实验方法
+
+每一项优化都应回答四个问题：
+
+| 问题 | 实验需要解释什么 |
+| --- | --- |
+| **Why：为什么？** | 改动针对的是计算、内存、通信还是调度瓶颈？ |
+| **How：怎么做？** | 算法、数据布局、kernel 或运行时发生了什么变化，为什么预期有效？ |
+| **Performance：效果怎样？** | kernel 耗时、端到端吞吐、延迟和显存占用分别怎样变化？ |
+| **Trade-offs：代价是什么？** | 哪些负载和硬件条件下有效，哪些情况下变差，需要付出什么代价？ |
+
+每轮实验先建立正确基线、抓取 profile，再验证一个具体的设计假设。改动之后检查正确性，
+同时测量 kernel 与端到端表现，再次 profile，找到下一个瓶颈。
+**更快的 kernel 可能把瓶颈转移到别处。** 因此，Attention、GEMM、通信、状态管理和运行时调度，
+需要放在真实运行的推理引擎中一起研究。
+
+实验记录本身就是项目的一部分：问题动机、实现选择、正确性检查、benchmark 配置、profile、
+实测结果，以及没有成功的尝试。你可以通过 [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues)、
+[性能报告](docs/perf-reports/)和 [benchmark 数据](docs/benchmarks/)复现、验证和质疑结论。
+后续实验也会沿用这一方法，公开负面结果和仍待回答的问题。
+
+## 当前研究范围
+
+- **模型：** DeepSeek-V4.1-Flash。运行时包含完整的 V4.1 架构；tiny 随机权重 checkpoint 用于较小规模的开发与正确性检查。
+- **测量重点：** 在 **4 × NVIDIA B200** 上运行真实模型的 prefill。整个 prefill 研究阶段固定这套 GPU 配置，
+  与官方 benchmark 的 GPU 配置一致，研究算法、kernel 和系统设计带来的提升。每组结果都会列明负载和测量口径。
+- **实现方式：** 保持运行时可读、可改，每个步骤都能检查和测量。代码随实验需要演进，研究围绕设计问题与实测影响展开。
 
 ## 快速开始
 
@@ -42,6 +62,11 @@ uv run examples/offline_inference.py
 
 ## 核心成果
 
+- **固定硬件下可追踪的优化过程：** 在已有记录的 4 × B200 优化轮次中，prefill 吞吐从 **1,084.8 提升到
+  4,315.9 tok/s/GPU（3.98 倍）**。这是相对本项目自身基线的提升；与官方 DeepInfer 的对比见下文。
+  [报告 A](docs/perf-reports/A-tensor-core-sparse-attention.md)、
+  [报告 B1](docs/perf-reports/B1-fused-index-scores.md)和
+  [报告 C1](docs/perf-reports/C1-moe-combine.md)记录了各轮设计选择，以及瓶颈如何随优化转移。
 - **在 4 × B200 上跑真实的 DeepSeek-V4.1-Flash，并按 DeepInfer 官方口径测出性能。** EP4 × DP4，131k 上下文，
   请求数、热身和测量窗口、指标定义都与官方 `run_sweep.sh prefill` 一致，结果直接用官方 `plot_pareto.py` 出图。
   并行层只有约 40 行（[`parallel.py`](deepinfer_lab/models/deepseek_v41/parallel.py)）。[→ 性能](#性能)
@@ -232,6 +257,20 @@ tiny 模型该配置实际增加 10.56 MiB。缓存先于自动 KV 预算分配�
 
 ## 路线图
 
+### 核心 kernel 研究计划
+
+我计划**从零重建 FlashMLA、DeepGEMM 和 DeepEP**，先写出简单、正确的研究实现，
+再逐个接入运行时。每个阶段都会先 profile，再逐步优化，同时测量 kernel 级和端到端表现。
+
+- [ ] **FlashMLA：** 研究注意力的数据搬运、KV 访问和 tile 划分，量化它们对完整注意力路径的影响。
+- [ ] **DeepGEMM：** 研究低精度 GEMM、专家分组计算与数据准备，同时评估数值和显存代价。
+- [ ] **DeepEP：** 在 MoE 执行路径中研究专家 dispatch/combine、通信，以及通信与计算的重叠。
+
+以上是未来研究方向。已有 kernel 和通过验证的运行时能力见前文；
+这些组件的重建会形成新的实验和对照结果。
+
+### 运行时与模型里程碑
+
 - [x] DeepSeek-V4.1 模型与官方实现对照测试套件
 - [x] 分页 block + state slot、chunked prefill、抢占、ZOS、确定性采样
 - [x] EP × DP 多卡运行真实 V4.1-Flash，按官方口径测 prefill
@@ -242,6 +281,26 @@ tiny 模型该配置实际增加 10.56 MiB。缓存先于自动 KV 预算分配�
 - [ ] 代价模型的 prefill chunk 切分（DeepInfer Q&A）
 - [ ] 端到端 batch-invariant 推理
 - [ ] 图像输入（V4.1 自带 ViT，checkpoint 已包含视觉权重）
+
+## 参与和技术讨论
+
+欢迎反馈、设计讨论、profiling 分析、复现验证和代码贡献。我也希望组织非正式的技术学习交流，
+一起研究架构、kernel、测量结果和设计取舍。
+你可以从 [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues) 开始，或通过
+[我的 GitHub 主页](https://github.com/algebra-MCX)联系我。
+
+我也参与 vLLM 的 Model Runner V2 开发（[#63372](https://github.com/vllm-project/vllm/pull/63372)、
+[#63476](https://github.com/vllm-project/vllm/pull/63476)），并在
+[小红书](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)分享「vLLM 晋升挑战」的进展。
+
+### 未来合作与 decode 研究
+
+如果有足够的社区兴趣，我希望探索与 **Inferact 团队**合作，争取更多 GPU 节点，
+理想情况下借用 **64 张 SM100 GPU 的集群**，进一步开展 decode 优化研究。
+合作和集群资源都属于未来设想，项目当前是独立的教育与实验项目。
+Prefill 研究会继续使用固定的 4 × B200 配置。
+
+> **项目近况（2026-10-25）：** 这个项目会持续更新。近日身体有些不适，我先休息几天。为了保持本仓库提交历史的整洁，我已将大部分个人优化代码放到私有仓库中。项目仍会继续推进，短暂休息后会恢复公开仓库的更新。感谢大家的理解与支持。
 
 ## 许可
 
