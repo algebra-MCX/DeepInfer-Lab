@@ -1,5 +1,13 @@
 <h1 align="center">mini-DeepInfer</h1>
 
+**mini-DeepInfer 的核心目标，是探究 DeepInfer 各个组件对整个推理引擎的影响，并进行量化分析。** 对我而言，项目最珍贵的部分就是完整、公开的优化过程：在 [Issues](https://github.com/algebra-MCX/mini-DeepInfer/issues) 中，你可以看到我的每一项优化，包括遇到了什么问题、设计思路是什么、采取了哪些解决措施，以及最终在真实 **4×B200** 上的端到端（E2E）真机测试。当前仅支持 **DeepSeek-V4.1-Flash**，实验聚焦 **Prefill**，通过组件分析与整机测试理解每项优化对引擎整体表现的影响。
+
+我也是 **vLLM 社区核心贡献者**，最近发起了「**vLLM 晋升挑战**」（详情见[我的小红书主页](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)），并与 **Inferact** 团队保持着良好的关系。如果项目反响良好，我会积极寻求与 Inferact 合作，争取借用 **64 张 SM100 GPU 的集群**，进一步开展 **Decode 优化**。
+
+如果你也想参与项目，欢迎通过[我的个人主页](https://github.com/algebra-MCX)与我联系。如果你想学习 DeepInfer 各个模块的优化核心思路，了解 **DeepGEMM、DeepEP、FlashMLA 如何在 DeepInfer 中协同设计**，欢迎 **Star、Fork 并分享本仓库**。
+
+**当仓库突破 2,000 Stars 和 100 Forks，我会积极与 Inferact 联系，争取集群资源并完成最重要的 Decode 优化。** 你的参与和热情，将是我寻求官方合作的最大底气。
+
 > **项目近况（2026-10-25）：** 这个项目会持续更新。近日身体有些不适，我先休息几天。为了保持本仓库提交历史的整洁，我已将大部分个人优化代码放到私有仓库中。项目仍会继续推进，短暂休息后会恢复公开仓库的更新。感谢大家的理解与支持。
 
 <p align="center">

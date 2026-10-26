@@ -1,5 +1,13 @@
 <h1 align="center">mini-DeepInfer</h1>
 
+**mini-DeepInfer's core goal is to investigate how each DeepInfer component affects the inference engine as a whole, and to quantify that impact.** To me, the most valuable part of this project is the complete, public optimization process. In the [Issues](https://github.com/algebra-MCX/mini-DeepInfer/issues), you can follow every optimization: the problem I encountered, my design reasoning, the solution, and the final end-to-end (E2E) tests on real **4×B200 hardware**. Currently, only **DeepSeek-V4.1-Flash** is supported, and experiments focus on **Prefill**, connecting component analysis with hardware measurements to understand the effect on the whole engine.
+
+I am also a **core contributor to the vLLM community** and recently launched the **vLLM Promotion Challenge** (see [my Xiaohongshu profile](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800) for details). I have a good relationship with the **Inferact** team. If the project gains traction, I will pursue a collaboration with Inferact and seek access to a **64-GPU SM100 cluster** for **Decode optimization**.
+
+If you would like to contribute, please contact me through [my personal profile](https://github.com/algebra-MCX). If you want to learn the reasoning behind each DeepInfer module's optimizations, including **how DeepGEMM, DeepEP, and FlashMLA are designed to work together within DeepInfer**, please **Star, Fork, and share this repository**.
+
+**Once the repository exceeds 2,000 Stars and 100 Forks, I will actively reach out to Inferact, seek cluster resources, and work to complete the crucial Decode optimizations.** Your participation and enthusiasm will give me the confidence to pursue an official collaboration.
+
 > **Project update (2026-10-25):** This project will continue to receive updates. I've been feeling unwell recently, so I'm taking a few days off. To keep this repository's commit history clean, I've moved most of my personal optimization code to a private repository. Development will continue, and updates to this public repository will resume after this short break. Thank you for your patience and support.
 
 <p align="center">
