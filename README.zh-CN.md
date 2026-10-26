@@ -2,7 +2,7 @@
 
 **mini-DeepInfer 的核心目标，是探究 DeepInfer 各个组件对整个推理引擎的影响，并进行量化分析。** 对我而言，项目最珍贵的部分就是完整、公开的优化过程：在 [Issues](https://github.com/algebra-MCX/mini-DeepInfer/issues) 中，你可以看到我的每一项优化，包括遇到了什么问题、设计思路是什么、采取了哪些解决措施，以及最终在真实 **4×B200** 上的端到端（E2E）真机测试。当前仅支持 **DeepSeek-V4.1-Flash**，实验聚焦 **Prefill**，通过组件分析与整机测试理解每项优化对引擎整体表现的影响。
 
-我也是 **vLLM 社区核心贡献者**，最近发起了「**vLLM 晋升挑战**」（详情见[我的小红书主页](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)），并与 **Inferact** 团队保持着良好的关系。如果项目反响良好，我会积极寻求与 Inferact 合作，争取借用 **64 张 SM100 GPU 的集群**，进一步开展 **Decode 优化**。
+我也是 **vLLM 贡献者**，在 **Model Runner V2（MRV2）** 的两个 PR 已合入主线（[#63372](https://github.com/vllm-project/vllm/pull/63372)、[#63476](https://github.com/vllm-project/vllm/pull/63476)），最近发起了「**vLLM 晋升挑战**」（详情见[我的小红书主页](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)），并与 **Inferact** 团队保持着良好的关系。如果项目反响良好，我会积极寻求与 Inferact 合作，争取借用 **64 张 SM100 GPU 的集群**，进一步开展 **Decode 优化**。
 
 如果你也想参与项目，欢迎通过[我的个人主页](https://github.com/algebra-MCX)与我联系。如果你想学习 DeepInfer 各个模块的优化核心思路，了解 **DeepGEMM、DeepEP、FlashMLA 如何在 DeepInfer 中协同设计**，欢迎 **Star、Fork 并分享本仓库**。
 
