@@ -1,6 +1,6 @@
-<h1 align="center">mini-DeepInfer</h1>
+<h1 align="center">DeepInfer-Lab</h1>
 
-**mini-DeepInfer 的核心目标，是探究 DeepInfer 各个组件对整个推理引擎的影响，并进行量化分析。** 对我而言，项目最珍贵的部分就是完整、公开的优化过程：在 [Issues](https://github.com/algebra-MCX/mini-DeepInfer/issues) 中，你可以看到我的每一项优化，包括遇到了什么问题、设计思路是什么、采取了哪些解决措施，以及最终在真实 **4×B200** 上的端到端（E2E）真机测试。当前仅支持 **DeepSeek-V4.1-Flash**，实验聚焦 **Prefill**，通过组件分析与整机测试理解每项优化对引擎整体表现的影响。
+**DeepInfer-Lab 的核心目标，是探究 DeepInfer 各个组件对整个推理引擎的影响，并进行量化分析。** 对我而言，项目最珍贵的部分就是完整、公开的优化过程：在 [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues) 中，你可以看到我的每一项优化，包括遇到了什么问题、设计思路是什么、采取了哪些解决措施，以及最终在真实 **4×B200** 上的端到端（E2E）真机测试。当前仅支持 **DeepSeek-V4.1-Flash**，实验聚焦 **Prefill**，通过组件分析与整机测试理解每项优化对引擎整体表现的影响。
 
 我也是 **vLLM 贡献者**，在 **Model Runner V2（MRV2）** 的两个 PR 已合入主线（[#63372](https://github.com/vllm-project/vllm/pull/63372)、[#63476](https://github.com/vllm-project/vllm/pull/63476)），最近发起了「**vLLM 晋升挑战**」（详情见[我的小红书主页](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800)），并与 **Inferact** 团队保持着良好的关系。如果项目反响良好，我会积极寻求与 Inferact 合作，争取借用 **64 张 SM100 GPU 的集群**，进一步开展 **Decode 优化**。
 
@@ -11,26 +11,26 @@
 > **项目近况（2026-10-25）：** 这个项目会持续更新。近日身体有些不适，我先休息几天。为了保持本仓库提交历史的整洁，我已将大部分个人优化代码放到私有仓库中。项目仍会继续推进，短暂休息后会恢复公开仓库的更新。感谢大家的理解与支持。
 
 <p align="center">
-  <a href="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
+  <a href="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
   <a href="README.md">English</a> · 简体中文
 </p>
 
 <p align="center">
-  <img src="docs/assets/mini-deepinfer-mark.png" width="320" alt="mini-DeepInfer 抽象推理徽标">
+  <img src="docs/assets/deepinfer-lab-mark.png" width="320" alt="DeepInfer-Lab 抽象推理徽标">
 </p>
 
 > 一个可以读懂的 DeepSeek-V4.1 运行时：从请求入队一路跟到下一个采样 token。
 
 **用约 2,000 行 PyTorch 读懂 [DeepInfer](https://github.com/deepseek-ai/DeepInfer)。** DeepInfer 在几十张 GPU 上服务
-DeepSeek-V4.1-Flash，靠 C++ 调度器、EP/DP/CP 并行和定制 kernel，代码难读，也需要 SM100 才能运行。mini-DeepInfer
+DeepSeek-V4.1-Flash，靠 C++ 调度器、EP/DP/CP 并行和定制 kernel，代码难读，也需要 SM100 才能运行。DeepInfer-Lab
 保留它最有特色的引擎设计，去掉规模相关的部分：单张 GPU 就能跑完整的 V4.1 架构，4 张 B200 能跑真实的 V4.1-Flash，
 请求的每一步都可以跟踪和修改。
 
 ## 快速开始
 
 ```bash
-git clone https://github.com/algebra-MCX/mini-DeepInfer.git
-cd mini-DeepInfer
+git clone https://github.com/algebra-MCX/DeepInfer-Lab.git
+cd DeepInfer-Lab
 uv run examples/offline_inference.py
 ```
 
@@ -44,7 +44,7 @@ uv run examples/offline_inference.py
 
 - **在 4 × B200 上跑真实的 DeepSeek-V4.1-Flash，并按 DeepInfer 官方口径测出性能。** EP4 × DP4，131k 上下文，
   请求数、热身和测量窗口、指标定义都与官方 `run_sweep.sh prefill` 一致，结果直接用官方 `plot_pareto.py` 出图。
-  并行层只有约 40 行（[`parallel.py`](minideepinfer/models/deepseek_v41/parallel.py)）。[→ 性能](#性能)
+  并行层只有约 40 行（[`parallel.py`](deepinfer_lab/models/deepseek_v41/parallel.py)）。[→ 性能](#性能)
 - **逐 token 对照 DeepSeek 官方参考实现。** 量化、候选块筛选与官方 TileLang kernel 逐位一致；整个引擎在 batch、
   ZOS、chunked prefill、抢占等所有调度模式下，logits 与官方 `inference/model.py` 的差距都小于 0.05。[→ 正确性](#正确性)
 - **完整的 V4.1 架构**：滑窗 + 压缩 KV、两级稀疏 indexer、hyper-connections、Engram n-gram 记忆、MoE，
@@ -61,11 +61,11 @@ uv run examples/offline_inference.py
 
 | 引擎 | 输入吞吐（tok/s/GPU） | 平均每步（ms） |
 | --- | ---: | ---: |
-| mini-DeepInfer（当前） | **4,315.9** | 949.0 |
+| DeepInfer-Lab（当前） | **4,315.9** | 949.0 |
 | 官方 DeepInfer + 单节点 NVLink 适配 | **36,170.9** | 113.2 |
 
-mini 当前达到本次官方配置的 **11.9%**（差距 8.4 倍）。这是单轮结果，不是三轮中位数，也不是全部优化开启后的性能上限。
-mini 使用已验证的当前运行时代码，包含 grouped GEMM、量化、HC、RMSNorm、SwiGLU，以及三项新优化：
+DeepInfer-Lab 当前达到本次官方配置的 **11.9%**（差距 8.4 倍）。这是单轮结果，不是三轮中位数，也不是全部优化开启后的性能上限。
+DeepInfer-Lab 使用已验证的当前运行时代码，包含 grouped GEMM、量化、HC、RMSNorm、SwiGLU，以及三项新优化：
 tensor core 稀疏注意力、融合 indexer 打分、MoE 只合并本地行并原地反量化；可选非专家权重缓存未开启。双方均 full replay、真实路由、无冗余专家、无
 投机解码，均未启用 decode CUDA Graph；本轮只测 prefill，KV 显存预算未强制相等。
 
@@ -169,7 +169,7 @@ V4.1 有两类注意力状态，调度器同时分配两者：
 ## 用法
 
 ```python
-from minideepinfer import LLM, SamplingParams
+from deepinfer_lab import LLM, SamplingParams
 
 llm = LLM("tiny-random/deepseek-v4.1-flash-1017", max_model_len=4096, kv_cache_memory_gb=2.0)
 outputs = llm.generate(
@@ -199,15 +199,15 @@ tiny 模型该配置实际增加 10.56 MiB。缓存先于自动 KV 预算分配�
 | 想了解的问题 | 从哪里开始 |
 | --- | --- |
 | 一个请求如何穿过整个运行时？ | [`docs/TECHNICAL.md`](docs/TECHNICAL.md) 第 2–5 节 |
-| V4.1 的注意力状态存在哪里？ | [`models/deepseek_v41/model.py`](minideepinfer/models/deepseek_v41/model.py) 与技术说明第 3 节 |
-| prefill、decode 和抢占如何配合？ | [`engine/scheduler.py`](minideepinfer/engine/scheduler.py) |
-| 缓存预算怎样计算？ | [`worker/model_runner.py`](minideepinfer/worker/model_runner.py) |
-| 多卡怎样切分？ | [`models/deepseek_v41/parallel.py`](minideepinfer/models/deepseek_v41/parallel.py) 与 `MoE`、`EngramTable` |
+| V4.1 的注意力状态存在哪里？ | [`models/deepseek_v41/model.py`](deepinfer_lab/models/deepseek_v41/model.py) 与技术说明第 3 节 |
+| prefill、decode 和抢占如何配合？ | [`engine/scheduler.py`](deepinfer_lab/engine/scheduler.py) |
+| 缓存预算怎样计算？ | [`worker/model_runner.py`](deepinfer_lab/worker/model_runner.py) |
+| 多卡怎样切分？ | [`models/deepseek_v41/parallel.py`](deepinfer_lab/models/deepseek_v41/parallel.py) 与 `MoE`、`EngramTable` |
 | 正确性怎样验证？ | [`tests/test_v41.py`](tests/test_v41.py) 与 [`tools/v41_reference.py`](tools/v41_reference.py) |
 
 与 DeepInfer 源码的对应关系：
 
-| mini-DeepInfer | DeepInfer 对应位置 |
+| DeepInfer-Lab | DeepInfer 对应位置 |
 | --- | --- |
 | `engine/block_manager.py` | `csrc/engine/block_manager.hpp` |
 | `engine/scheduler.py` | `csrc/engine/scheduler.hpp`（`_schedule_prefill`、`_schedule_decode`） |

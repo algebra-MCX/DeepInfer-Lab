@@ -31,7 +31,7 @@ self-hosted, linux, x64, gpu
 ```bash
 python -c 'import torch; assert torch.cuda.is_available(); print(torch.cuda.get_device_name())'
 pytest -q -rs
-python -m compileall -q minideepinfer tests tools examples bench.py
+python -m compileall -q deepinfer_lab tests tools examples bench.py
 git diff --check
 ```
 

@@ -7,15 +7,15 @@
 
 | 引擎 | 输入 tok/s/GPU | 平均每步（ms） |
 | --- | ---: | ---: |
-| mini-DeepInfer | 4,315.9 | 949.0 |
+| DeepInfer-Lab | 4,315.9 | 949.0 |
 | 官方 DeepInfer + NVLink 适配 | 36,170.9 | 113.2 |
 
-mini 为官方配置的 **11.9%**（差距 8.4 倍）。双方均 full replay、真实路由，只测 prefill；mini 的可选权重缓存未开启，
+DeepInfer-Lab 为官方配置的 **11.9%**（差距 8.4 倍）。双方均 full replay、真实路由，只测 prefill；DeepInfer-Lab 的可选权重缓存未开启，
 两边均未启用 decode CUDA Graph。仅一组配对结果，KV 显存预算也未强制相等，不能称为全部优化启用后的上限。
 
 ## 分环节耗时（profile，ms/步）
 
-| 环节 | mini | 官方 |
+| 环节 | DeepInfer-Lab | 官方 |
 | --- | ---: | ---: |
 | 稀疏注意力核心 | 99.0 | 14.9 |
 | 注意力 key 拼接（gather / cat / where） | 182 | 0 |
@@ -27,6 +27,8 @@ mini 为官方配置的 **11.9%**（差距 8.4 倍）。双方均 full replay、
 
 各项优化的动机、方案、kernel 级数据和精度验证见 [`../perf-reports/`](../perf-reports/)。原始日志与 profile 摘要见
 [`profile-2026-10-22/`](profile-2026-10-22/)。
+
+归档中的项目标签、包路径和文件名已按 DeepInfer-Lab 的命名统一；测量数值、测试配置和提交标识保持原样。
 
 ## 运行入口
 

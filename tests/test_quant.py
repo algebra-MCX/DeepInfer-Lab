@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from minideepinfer.models.deepseek_v41.quant import fp4_fake_quant, fp8_fake_quant
+from deepinfer_lab.models.deepseek_v41.quant import fp4_fake_quant, fp8_fake_quant
 
 
 @pytest.mark.gpu

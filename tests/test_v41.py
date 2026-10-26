@@ -28,7 +28,7 @@ def ref():
 
 @pytest.fixture(scope="module")
 def golden(ref):
-    from minideepinfer.config import resolve_model_path
+    from deepinfer_lab.config import resolve_model_path
     from tools.v41_reference import build_reference, golden_logits, make_prompts
 
     model, _ = build_reference(resolve_model_path(MODEL), max_seq_len=1024)
@@ -46,7 +46,7 @@ def golden(ref):
 
 
 def test_fp8_fake_quant_matches_kernel(ref):
-    from minideepinfer.models.deepseek_v41.quant import fp8_fake_quant
+    from deepinfer_lab.models.deepseek_v41.quant import fp8_fake_quant
 
     x = (torch.randn(64, 512, device="cuda") * torch.logspace(-3, 2, 512, device="cuda")).bfloat16()
     expected = ref.act_quant(x.clone(), 32, "ue8m0", torch.float8_e8m0fnu, True)
@@ -55,7 +55,7 @@ def test_fp8_fake_quant_matches_kernel(ref):
 
 @pytest.mark.parametrize("block,e4m3", [(32, False), (16, True)])
 def test_fp4_fake_quant_matches_kernel(ref, block, e4m3):
-    from minideepinfer.models.deepseek_v41.quant import fp4_fake_quant
+    from deepinfer_lab.models.deepseek_v41.quant import fp4_fake_quant
 
     x = (torch.randn(64, 512, device="cuda") * torch.logspace(-3, 2, 512, device="cuda")).bfloat16()
     scale_dtype = torch.float8_e4m3fn if e4m3 else torch.float8_e8m0fnu
@@ -64,7 +64,7 @@ def test_fp4_fake_quant_matches_kernel(ref, block, e4m3):
 
 
 def test_sinkhorn_matches_kernel(ref):
-    from minideepinfer.models.deepseek_v41.model import hc_split_sinkhorn
+    from deepinfer_lab.models.deepseek_v41.model import hc_split_sinkhorn
 
     mixes = torch.randn(1, 50, 24, device="cuda")
     scale, base = torch.rand(3, device="cuda"), torch.randn(24, device="cuda")
@@ -74,7 +74,7 @@ def test_sinkhorn_matches_kernel(ref):
 
 
 def test_sparse_attention_matches_kernel(ref):
-    from minideepinfer.models.deepseek_v41.model import sparse_attention
+    from deepinfer_lab.models.deepseek_v41.model import sparse_attention
 
     T, H, D, N, K = 40, 4, 512, 200, 96
     q = torch.randn(1, T, H, D, device="cuda").bfloat16()
@@ -90,7 +90,7 @@ def test_sparse_attention_matches_kernel(ref):
 
 
 def test_candidate_blocks_match_reference(ref):
-    from minideepinfer.models.deepseek_v41.model import select_candidate_blocks
+    from deepinfer_lab.models.deepseek_v41.model import select_candidate_blocks
 
     T, n = 64, 300
     scores = torch.randn(T, n, device="cuda")
@@ -120,7 +120,7 @@ def check_against_golden(outputs, golden_cases, captured):
 
 
 def run_engine(golden_cases, *, force_reference_tokens=False, **kwargs):
-    from minideepinfer import LLM, SamplingParams
+    from deepinfer_lab import LLM, SamplingParams
 
     args = dict(max_num_seqs=8, max_model_len=1024, max_num_batched_tokens=1024, kv_cache_memory_gb=0.5) | kwargs
     llm = LLM(MODEL, **args)

@@ -4,7 +4,7 @@ import enum
 import itertools
 import time
 
-from minideepinfer.sampling_params import SamplingParams
+from deepinfer_lab.sampling_params import SamplingParams
 
 
 class SequenceStatus(enum.Enum):
@@ -62,7 +62,7 @@ class Sequence:
         # carry a stale epoch and are discarded when they come back.
         self.epoch = 0
 
-        # Wall-clock timestamps (time.perf_counter) for latency metrics, see `minideepinfer.metrics`.
+        # Wall-clock timestamps (time.perf_counter) for latency metrics, see `deepinfer_lab.metrics`.
         self.arrival_time = time.perf_counter()
         self.first_token_time: float | None = None
         self.finish_time: float | None = None

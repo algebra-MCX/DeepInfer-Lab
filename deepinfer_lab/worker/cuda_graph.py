@@ -21,8 +21,8 @@ from bisect import bisect_left
 
 import torch
 
-from minideepinfer.models.deepseek_v41 import DeepseekV41
-from minideepinfer.models.deepseek_v41.model import PAGE_TOKENS, V41Batch
+from deepinfer_lab.models.deepseek_v41 import DeepseekV41
+from deepinfer_lab.models.deepseek_v41.model import PAGE_TOKENS, V41Batch
 
 logger = logging.getLogger(__name__)
 

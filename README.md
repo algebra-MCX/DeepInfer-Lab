@@ -1,6 +1,6 @@
-<h1 align="center">mini-DeepInfer</h1>
+<h1 align="center">DeepInfer-Lab</h1>
 
-**mini-DeepInfer's core goal is to investigate how each DeepInfer component affects the inference engine as a whole, and to quantify that impact.** To me, the most valuable part of this project is the complete, public optimization process. In the [Issues](https://github.com/algebra-MCX/mini-DeepInfer/issues), you can follow every optimization: the problem I encountered, my design reasoning, the solution, and the final end-to-end (E2E) tests on real **4×B200 hardware**. Currently, only **DeepSeek-V4.1-Flash** is supported, and experiments focus on **Prefill**, connecting component analysis with hardware measurements to understand the effect on the whole engine.
+**DeepInfer-Lab's core goal is to investigate how each DeepInfer component affects the inference engine as a whole, and to quantify that impact.** To me, the most valuable part of this project is the complete, public optimization process. In the [Issues](https://github.com/algebra-MCX/DeepInfer-Lab/issues), you can follow every optimization: the problem I encountered, my design reasoning, the solution, and the final end-to-end (E2E) tests on real **4×B200 hardware**. Currently, only **DeepSeek-V4.1-Flash** is supported, and experiments focus on **Prefill**, connecting component analysis with hardware measurements to understand the effect on the whole engine.
 
 I am also a **vLLM contributor**, with two PRs in **Model Runner V2 (MRV2)** merged into the main branch ([#63372](https://github.com/vllm-project/vllm/pull/63372), [#63476](https://github.com/vllm-project/vllm/pull/63476)), and recently launched the **vLLM Promotion Challenge** (see [my Xiaohongshu profile](https://www.xiaohongshu.com/user/profile/6ad229240000000005006800) for details). I have a good relationship with the **Inferact** team. If the project gains traction, I will pursue a collaboration with Inferact and seek access to a **64-GPU SM100 cluster** for **Decode optimization**.
 
@@ -11,27 +11,27 @@ If you would like to contribute, please contact me through [my personal profile]
 > **Project update (2026-10-25):** This project will continue to receive updates. I've been feeling unwell recently, so I'm taking a few days off. To keep this repository's commit history clean, I've moved most of my personal optimization code to a private repository. Development will continue, and updates to this public repository will resume after this short break. Thank you for your patience and support.
 
 <p align="center">
-  <a href="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/mini-DeepInfer/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
+  <a href="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml"><img alt="CPU checks" src="https://github.com/algebra-MCX/DeepInfer-Lab/actions/workflows/ci.yml/badge.svg"></a> <img alt="Target" src="https://img.shields.io/badge/Target-NVIDIA%20B200-blue"> <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-green"><br>
   English · <a href="README.zh-CN.md">简体中文</a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/mini-deepinfer-mark.png" width="320" alt="mini-DeepInfer abstract inference mark">
+  <img src="docs/assets/deepinfer-lab-mark.png" width="320" alt="DeepInfer-Lab abstract inference mark">
 </p>
 
 > A DeepSeek-V4.1 runtime you can read: follow a request from the queue to its next sampled token.
 
 **Read [DeepInfer](https://github.com/deepseek-ai/DeepInfer) in ~2,000 lines of PyTorch.** DeepInfer serves
 DeepSeek-V4.1-Flash on dozens of GPUs with a C++ scheduler, EP/DP/CP parallelism and custom kernels; it is hard to
-read and needs SM100 hardware. mini-DeepInfer keeps the engine design that makes it distinctive and drops the scale:
+read and needs SM100 hardware. DeepInfer-Lab keeps the engine design that makes it distinctive and drops the scale:
 the full V4.1 architecture runs on a single GPU, the real V4.1-Flash runs on 4 B200s, and every step of a request
 can be followed and changed.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/algebra-MCX/mini-DeepInfer.git
-cd mini-DeepInfer
+git clone https://github.com/algebra-MCX/DeepInfer-Lab.git
+cd DeepInfer-Lab
 uv run examples/offline_inference.py
 ```
 
@@ -46,7 +46,7 @@ uv run examples/offline_inference.py
 - **The real DeepSeek-V4.1-Flash on 4 × B200, benchmarked the way DeepInfer benchmarks itself.** EP4 × DP4, 131k
   context; request counts, warm-up and measurement windows and metrics match the official `run_sweep.sh prefill`,
   and the plot comes straight out of the official `plot_pareto.py`. The parallel layer is ~40 lines
-  ([`parallel.py`](minideepinfer/models/deepseek_v41/parallel.py)). [→ Performance](#performance)
+  ([`parallel.py`](deepinfer_lab/models/deepseek_v41/parallel.py)). [→ Performance](#performance)
 - **Checked token by token against DeepSeek's official reference implementation.** Quantization and candidate
   selection match the official TileLang kernels bit for bit; the whole engine stays within 0.05 of the official
   `inference/model.py` logits in every scheduling mode: batching, ZOS, chunked prefill and preemption.
@@ -68,11 +68,11 @@ The window contains 10 complete steady-state steps.
 
 | Engine | Input throughput (tok/s/GPU) | Mean step (ms) |
 | --- | ---: | ---: |
-| mini-DeepInfer (current) | **4,315.9** | 949.0 |
+| DeepInfer-Lab (current) | **4,315.9** | 949.0 |
 | Official DeepInfer + single-node NVLink adapter | **36,170.9** | 113.2 |
 
-mini now reaches **11.9%** of this official configuration (an 8.4× gap). This is one paired run, not a three-run median or a
-result with every optimization enabled. mini uses the current validated runtime, including grouped GEMMs, quantization, HC, RMSNorm and SwiGLU changes
+DeepInfer-Lab now reaches **11.9%** of this official configuration (an 8.4× gap). This is one paired run, not a three-run median or a
+result with every optimization enabled. DeepInfer-Lab uses the current validated runtime, including grouped GEMMs, quantization, HC, RMSNorm and SwiGLU changes
 plus three new optimizations: sparse attention on tensor cores, fused indexer scoring, and MoE combine over local
 rows with in-place dequantization. Its optional
 non-expert weight cache is disabled. Both engines use full replay and real routing, with no redundant experts,
@@ -184,7 +184,7 @@ local shard, and reduce-scatter the results back. In a single process the commun
 ## Usage
 
 ```python
-from minideepinfer import LLM, SamplingParams
+from deepinfer_lab import LLM, SamplingParams
 
 llm = LLM("tiny-random/deepseek-v4.1-flash-1017", max_model_len=4096, kv_cache_memory_gb=2.0)
 outputs = llm.generate(
@@ -215,15 +215,15 @@ The benchmark option is `bench.py --weight-cache-gb 0.02`; gains depend on the m
 | Question | Start here |
 | --- | --- |
 | How does a request move through the runtime? | [`docs/TECHNICAL.md`](docs/TECHNICAL.md), sections 2–5 |
-| Where does V4.1's attention state live? | [`models/deepseek_v41/model.py`](minideepinfer/models/deepseek_v41/model.py) and section 3 of the technical notes |
-| How do prefill, decode and preemption fit together? | [`engine/scheduler.py`](minideepinfer/engine/scheduler.py) |
-| How is the cache budget computed? | [`worker/model_runner.py`](minideepinfer/worker/model_runner.py) |
-| How is the model split across GPUs? | [`models/deepseek_v41/parallel.py`](minideepinfer/models/deepseek_v41/parallel.py), `MoE` and `EngramTable` |
+| Where does V4.1's attention state live? | [`models/deepseek_v41/model.py`](deepinfer_lab/models/deepseek_v41/model.py) and section 3 of the technical notes |
+| How do prefill, decode and preemption fit together? | [`engine/scheduler.py`](deepinfer_lab/engine/scheduler.py) |
+| How is the cache budget computed? | [`worker/model_runner.py`](deepinfer_lab/worker/model_runner.py) |
+| How is the model split across GPUs? | [`models/deepseek_v41/parallel.py`](deepinfer_lab/models/deepseek_v41/parallel.py), `MoE` and `EngramTable` |
 | How is correctness checked? | [`tests/test_v41.py`](tests/test_v41.py) and [`tools/v41_reference.py`](tools/v41_reference.py) |
 
 Where each part comes from in DeepInfer:
 
-| mini-DeepInfer | DeepInfer |
+| DeepInfer-Lab | DeepInfer |
 | --- | --- |
 | `engine/block_manager.py` | `csrc/engine/block_manager.hpp` |
 | `engine/scheduler.py` | `csrc/engine/scheduler.hpp` (`_schedule_prefill`, `_schedule_decode`) |

@@ -23,17 +23,17 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from minideepinfer.models.deepseek_v41.activation import swiglu_cuda
-from minideepinfer.models.deepseek_v41.attention import sparse_attention_cuda
-from minideepinfer.models.deepseek_v41.config import V41Config
-from minideepinfer.models.deepseek_v41.engram import EngramHasher
-from minideepinfer.models.deepseek_v41.hc import collapse_cuda, expand_cuda, split_sinkhorn_cuda
-from minideepinfer.models.deepseek_v41.indexer import index_scores_cuda
-from minideepinfer.models.deepseek_v41.moe import combine_cuda
-from minideepinfer.models.deepseek_v41.norm import rms_norm_cuda
-from minideepinfer.models.deepseek_v41.parallel import all_gather_rows, reduce_scatter_rows, world
-from minideepinfer.models.deepseek_v41.quant import fp4_fake_quant, fp8_fake_quant
-from minideepinfer.models.deepseek_v41.weights import BLOCK, dequant_fp4, dequant_fp8
+from deepinfer_lab.models.deepseek_v41.activation import swiglu_cuda
+from deepinfer_lab.models.deepseek_v41.attention import sparse_attention_cuda
+from deepinfer_lab.models.deepseek_v41.config import V41Config
+from deepinfer_lab.models.deepseek_v41.engram import EngramHasher
+from deepinfer_lab.models.deepseek_v41.hc import collapse_cuda, expand_cuda, split_sinkhorn_cuda
+from deepinfer_lab.models.deepseek_v41.indexer import index_scores_cuda
+from deepinfer_lab.models.deepseek_v41.moe import combine_cuda
+from deepinfer_lab.models.deepseek_v41.norm import rms_norm_cuda
+from deepinfer_lab.models.deepseek_v41.parallel import all_gather_rows, reduce_scatter_rows, world
+from deepinfer_lab.models.deepseek_v41.quant import fp4_fake_quant, fp8_fake_quant
+from deepinfer_lab.models.deepseek_v41.weights import BLOCK, dequant_fp4, dequant_fp8
 
 PAGE_TOKENS = 128  # Positions covered by one KV cache block (the reference's 128-token store granularity).
 ATTN_QUERY_CHUNK = 256  # Queries per gathered attention slice; bounds the [T, keys, head_dim] buffer.

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from minideepinfer.sequence import Sequence
+from deepinfer_lab.sequence import Sequence
 
 
 @dataclass

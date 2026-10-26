@@ -4,7 +4,7 @@ import pytest
 import torch
 import triton
 
-from minideepinfer.models.deepseek_v41.weights import dequant_fp4, dequant_fp8
+from deepinfer_lab.models.deepseek_v41.weights import dequant_fp4, dequant_fp8
 
 
 @pytest.mark.gpu

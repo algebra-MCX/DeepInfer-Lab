@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from minideepinfer.worker.cuda_graph import build_context_buckets, build_graph_batch_sizes
+from deepinfer_lab.worker.cuda_graph import build_context_buckets, build_graph_batch_sizes
 from tests.conftest import MODEL
 
 LOGIT_ATOL = 0.05  # as tests/test_v41.py: bf16 accumulation-order noise
@@ -19,7 +19,7 @@ def test_graph_sizes():
 
 
 def run(enable_cuda_graph, prompts, max_tokens):
-    from minideepinfer import LLM, SamplingParams
+    from deepinfer_lab import LLM, SamplingParams
 
     llm = LLM(MODEL, max_num_seqs=8, max_model_len=640, kv_cache_memory_gb=0.5, enable_cuda_graph=enable_cuda_graph)
     runner = llm.llm_engine.model_runner
@@ -68,8 +68,8 @@ def test_graph_decode_matches_eager():
 def test_rows_past_the_batch_are_reset_to_padding():
     """A row a previous, larger step used must not keep its sequence's slot and blocks: replaying it
     would write into storage that may by then belong to (or be shared with) another sequence."""
-    from minideepinfer import LLM
-    from minideepinfer.models.deepseek_v41.model import V41Batch
+    from deepinfer_lab import LLM
+    from deepinfer_lab.models.deepseek_v41.model import V41Batch
 
     llm = LLM(MODEL, max_num_seqs=8, max_model_len=640, kv_cache_memory_gb=0.5)
     graphs = llm.llm_engine.model_runner.graphs

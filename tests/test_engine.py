@@ -1,10 +1,10 @@
 """CPU-only LLMEngine tests; the model runner is replaced by a fake step handle."""
 
-from minideepinfer.engine.block_manager import BlockManager
-from minideepinfer.engine.llm_engine import LLMEngine, StatsLogger
-from minideepinfer.engine.scheduler import Scheduler
-from minideepinfer.sampling_params import SamplingParams
-from minideepinfer.sequence import Sequence, SequenceStatus
+from deepinfer_lab.engine.block_manager import BlockManager
+from deepinfer_lab.engine.llm_engine import LLMEngine, StatsLogger
+from deepinfer_lab.engine.scheduler import Scheduler
+from deepinfer_lab.sampling_params import SamplingParams
+from deepinfer_lab.sequence import Sequence, SequenceStatus
 
 
 class FakeHandle:

@@ -44,5 +44,5 @@ jobs:
         run: pytest -q -rs
       - name: Compile and check whitespace
         run: |
-          python -m compileall -q minideepinfer tests tools examples bench.py
+          python -m compileall -q deepinfer_lab tests tools examples bench.py
           git diff --check

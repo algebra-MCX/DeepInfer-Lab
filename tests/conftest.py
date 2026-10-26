@@ -3,7 +3,7 @@ import os
 import pytest
 import torch
 
-MODEL = os.environ.get("MINIDEEPINFER_TEST_MODEL", "tiny-random/deepseek-v4.1-flash-1017")
+MODEL = os.environ.get("DEEPINFER_LAB_TEST_MODEL", "tiny-random/deepseek-v4.1-flash-1017")
 
 
 def pytest_collection_modifyitems(config, items):

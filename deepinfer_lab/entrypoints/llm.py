@@ -5,10 +5,10 @@ from typing import Any
 
 from tqdm import tqdm
 
-from minideepinfer.config import Config
-from minideepinfer.engine.llm_engine import LLMEngine
-from minideepinfer.metrics import RequestMetrics
-from minideepinfer.sampling_params import SamplingParams
+from deepinfer_lab.config import Config
+from deepinfer_lab.engine.llm_engine import LLMEngine
+from deepinfer_lab.metrics import RequestMetrics
+from deepinfer_lab.sampling_params import SamplingParams
 
 
 @dataclass

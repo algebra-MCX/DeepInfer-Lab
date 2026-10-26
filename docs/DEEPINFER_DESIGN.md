@@ -1,6 +1,6 @@
 # DeepInfer 风格的运行时设计
 
-这份文档先于代码实现，记录 mini-DeepInfer 要坚持的工程边界、状态不变量和验证方法。目标不是复制 DeepInfer 的生产代码，而是保留它最值得学习的技术品味：把调度、内存、设备执行和正确性证据拆开，让每一个性能优化都能落回一个可检查的状态转移。
+这份文档先于代码实现，记录 DeepInfer-Lab 要坚持的工程边界、状态不变量和验证方法。目标不是复制 DeepInfer 的生产代码，而是保留它最值得学习的技术品味：把调度、内存、设备执行和正确性证据拆开，让每一个性能优化都能落回一个可检查的状态转移。
 
 官方 DeepInfer 的公开说明将优化 kernel、并行、DSpark、异步调度、batch-invariant、确定性采样和结构化输出列为核心能力；官方调度器源码则把 `SchedulerOutputs`、prefill/decode、block manager 和异步 step 作为独立边界：
 
@@ -11,7 +11,7 @@
 
 ## 1. 先定义运行时的承诺
 
-mini-DeepInfer 当前是以 PyTorch 为主的可读实现，支持单卡和机内 EP × DP。它需要满足四个可观察的承诺：
+DeepInfer-Lab 当前是以 PyTorch 为主的可读实现，支持单卡和机内 EP × DP。它需要满足四个可观察的承诺：
 
 1. **每一个 step 都有明确输入和输出。** 调度输出描述本轮 token 数、序列顺序、block table 和需要采样的行；设备执行不偷偷改变 CPU 队列。
 2. **资源生命周期可以被证明。** KV block 和 V4.1 state slot 都有唯一的所有者；抢占、完成、取消都会释放两类资源。
@@ -22,7 +22,7 @@ mini-DeepInfer 当前是以 PyTorch 为主的可读实现，支持单卡和机�
 
 ## 2. 官方设计与本项目的映射
 
-| 官方 DeepInfer 概念 | mini-DeepInfer 的实现 | 当前边界 |
+| 官方 DeepInfer 概念 | DeepInfer-Lab 的实现 | 当前边界 |
 | --- | --- | --- |
 | C++ `Scheduler` / `SchedulerOutputs` | `engine/scheduler.py` 的 `Scheduler` / `SchedulerOutput` | 单进程、无 DP 组投票 |
 | `BlockManager` free list 与引用计数 | `engine/block_manager.py` | 单 GPU，无跨 rank 共享 |
@@ -122,7 +122,7 @@ state_manager.free([seq.state_slot])
 
 ## 6. 采样与可重放性
 
-官方文档把 deterministic sampling 和 batch-invariant 作为独立能力。mini-DeepInfer 使用以下约束实现教学版等价：
+官方文档把 deterministic sampling 和 batch-invariant 作为独立能力。DeepInfer-Lab 使用以下约束实现教学版等价：
 
 ```text
 sample_seed = mix_seed(sequence_seed, output_position)
@@ -148,9 +148,9 @@ token = GumbelMax(logits / temperature, sample_seed)
 
 第 4、5 步都不能在没有基准和 reference 对照的情况下直接宣称“完成”。如果一个优化改变了 cache layout 或 scheduler contract，必须先更新本文件的映射表和不变量。
 
-第 4 步的 tiny checkpoint 验证见 PR [#13](https://github.com/algebra-MCX/mini-DeepInfer/pull/13)、
-[#14](https://github.com/algebra-MCX/mini-DeepInfer/pull/14)、[#15](https://github.com/algebra-MCX/mini-DeepInfer/pull/15)、
-[#16](https://github.com/algebra-MCX/mini-DeepInfer/pull/16)：包含空专家、EP 分片、压缩组边界和 graph padding 回归测试，
+第 4 步的 tiny checkpoint 验证见 PR [#13](https://github.com/algebra-MCX/DeepInfer-Lab/pull/13)、
+[#14](https://github.com/algebra-MCX/DeepInfer-Lab/pull/14)、[#15](https://github.com/algebra-MCX/DeepInfer-Lab/pull/15)、
+[#16](https://github.com/algebra-MCX/DeepInfer-Lab/pull/16)：包含空专家、EP 分片、压缩组边界和 graph padding 回归测试，
 以及官方 reference logits 对照（`LOGIT_ATOL=0.05`）。其中 1×B200 的 tiny 离线输出吞吐从 478 提升至
 2643 tok/s（3 次取中位数）；这不代表真实 checkpoint 的多卡 prefill 数据已更新。具体 workload、
 TTFT、TPOT、goodput 和 capture 开销以各 PR 的实验记录为准。

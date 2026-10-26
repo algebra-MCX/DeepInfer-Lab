@@ -9,7 +9,7 @@
 ## 验证
 
 - [ ] `pytest -q`
-- [ ] `python -m compileall -q minideepinfer tests`
+- [ ] `python -m compileall -q deepinfer_lab tests`
 - [ ] `git diff --check`
 - [ ] GPU 测试：填写 GPU 型号、checkpoint、batch、上下文长度、dtype、warm-up 和结果；没有 GPU 写明 skipped
 

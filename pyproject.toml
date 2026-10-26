@@ -3,9 +3,9 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "minideepinfer"
+name = "DeepInfer-Lab"
 version = "0.1.0"
-description = "A minimal, readable re-implementation of DeepInfer's engine design, serving DeepSeek-V4.1 on one GPU"
+description = "An open lab for DeepInfer systems research, correctness validation, and end-to-end optimization"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 dependencies = [
@@ -23,7 +23,7 @@ dependencies = [
 dev = ["pytest", "sympy", "tilelang", "pillow"]  # the reference implementation used by tests/test_v41.py
 
 [tool.setuptools.packages.find]
-include = ["minideepinfer*"]
+include = ["deepinfer_lab*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

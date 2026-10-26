@@ -16,7 +16,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from minideepinfer.models.deepseek_v41.config import V41Config
+from deepinfer_lab.models.deepseek_v41.config import V41Config
 
 
 def _is_prime(n: int) -> bool:

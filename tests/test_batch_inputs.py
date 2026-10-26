@@ -5,10 +5,10 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from minideepinfer import SamplingParams
-from minideepinfer.engine.scheduler import SchedulerOutput
-from minideepinfer.sequence import Sequence
-from minideepinfer.worker.model_runner import ModelRunner
+from deepinfer_lab import SamplingParams
+from deepinfer_lab.engine.scheduler import SchedulerOutput
+from deepinfer_lab.sequence import Sequence
+from deepinfer_lab.worker.model_runner import ModelRunner
 
 
 @pytest.mark.gpu

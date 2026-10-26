@@ -2,7 +2,7 @@
 
 The official code ships inside the DeepSeek-V4.1-Flash checkpoint repo; only its `inference/`
 folder is downloaded. It runs here in bf16 mode (`dtype="bf16"`, `expert_dtype=None`) on weights
-dequantized from the FP8/FP4 checkpoint, which is the numerics mini-DeepInfer reproduces.
+dequantized from the FP8/FP4 checkpoint, which is the numerics DeepInfer-Lab reproduces.
 
 Usage:
     python tools/v41_reference.py --model tiny-random/deepseek-v4.1-flash-1017 --out golden.pt
@@ -16,11 +16,11 @@ import sys
 
 import torch
 from huggingface_hub import snapshot_download
-from minideepinfer.tokenizer import load_tokenizer
+from deepinfer_lab.tokenizer import load_tokenizer
 
-from minideepinfer.config import resolve_model_path
-from minideepinfer.models.deepseek_v41.config import V41Config
-from minideepinfer.models.deepseek_v41.weights import iterate_dequantized
+from deepinfer_lab.config import resolve_model_path
+from deepinfer_lab.models.deepseek_v41.config import V41Config
+from deepinfer_lab.models.deepseek_v41.weights import iterate_dequantized
 
 REFERENCE_REPO = "deepseek-ai/DeepSeek-V4.1-Flash-1017"
 

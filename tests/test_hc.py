@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from minideepinfer.models.deepseek_v41.model import hc_split_sinkhorn
+from deepinfer_lab.models.deepseek_v41.model import hc_split_sinkhorn
 
 pytestmark = pytest.mark.gpu
 

@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from minideepinfer.models.deepseek_v41.model import index_scores
+from deepinfer_lab.models.deepseek_v41.model import index_scores
 
 pytestmark = pytest.mark.gpu
 H, D = 4, 128

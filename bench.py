@@ -18,8 +18,8 @@ from datetime import datetime, timezone
 import numpy as np
 import torch
 
-from minideepinfer import LLM, SamplingParams
-from minideepinfer.metrics import RequestMetrics, summarize
+from deepinfer_lab import LLM, SamplingParams
+from deepinfer_lab.metrics import RequestMetrics, summarize
 from tools.benchmark_record import build_record
 
 parser = argparse.ArgumentParser()

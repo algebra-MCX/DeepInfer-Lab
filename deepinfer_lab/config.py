@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 
 import torch
 
-from minideepinfer.models.deepseek_v41.config import V41Config
-from minideepinfer.models.deepseek_v41.model import PAGE_TOKENS
+from deepinfer_lab.models.deepseek_v41.config import V41Config
+from deepinfer_lab.models.deepseek_v41.model import PAGE_TOKENS
 
 
 def resolve_model_path(model: str) -> str:

@@ -2,10 +2,10 @@
 
 import pytest
 
-from minideepinfer.engine.block_manager import BlockManager
-from minideepinfer.engine.scheduler import Scheduler
-from minideepinfer.sampling_params import SamplingParams
-from minideepinfer.sequence import Sequence, SequenceStatus
+from deepinfer_lab.engine.block_manager import BlockManager
+from deepinfer_lab.engine.scheduler import Scheduler
+from deepinfer_lab.sampling_params import SamplingParams
+from deepinfer_lab.sequence import Sequence, SequenceStatus
 
 BLOCK = 4
 EOS = 99

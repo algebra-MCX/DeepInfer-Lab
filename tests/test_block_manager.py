@@ -1,6 +1,6 @@
 import pytest
 
-from minideepinfer.engine.block_manager import AllocStatus, BlockManager
+from deepinfer_lab.engine.block_manager import AllocStatus, BlockManager
 
 
 def test_block_zero_is_reserved():

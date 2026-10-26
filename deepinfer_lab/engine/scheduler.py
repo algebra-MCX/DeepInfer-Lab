@@ -23,8 +23,8 @@ import logging
 from collections import deque
 from dataclasses import dataclass, field
 
-from minideepinfer.engine.block_manager import AllocStatus, BlockManager
-from minideepinfer.sequence import Sequence, SequenceStatus
+from deepinfer_lab.engine.block_manager import AllocStatus, BlockManager
+from deepinfer_lab.sequence import Sequence, SequenceStatus
 
 logger = logging.getLogger(__name__)
 

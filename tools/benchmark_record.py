@@ -3,7 +3,7 @@
 import math
 from dataclasses import asdict
 
-from minideepinfer.metrics import RequestMetrics
+from deepinfer_lab.metrics import RequestMetrics
 
 
 def _json_safe(value):

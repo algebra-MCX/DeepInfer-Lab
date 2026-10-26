@@ -2,7 +2,7 @@
 
 import json
 
-from minideepinfer.metrics import RequestMetrics, summarize
+from deepinfer_lab.metrics import RequestMetrics, summarize
 from tools.benchmark_record import build_record
 from tests.test_metrics import timed_seq
 

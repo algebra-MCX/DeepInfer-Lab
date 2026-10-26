@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from minideepinfer.layers.sampler import Sampler, SamplingTensors, apply_top_k_top_p, gumbel_noise, mix_seed
+from deepinfer_lab.layers.sampler import Sampler, SamplingTensors, apply_top_k_top_p, gumbel_noise, mix_seed
 
 pytestmark = pytest.mark.gpu
 V = 1000

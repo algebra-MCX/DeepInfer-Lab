@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from minideepinfer.models.deepseek_v41.model import RMSNorm
+from deepinfer_lab.models.deepseek_v41.model import RMSNorm
 
 pytestmark = pytest.mark.gpu
 

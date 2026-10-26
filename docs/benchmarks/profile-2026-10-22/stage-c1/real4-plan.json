@@ -9,16 +9,16 @@
     {
       "rev": "perf/fused-index-scores",
       "sha": "32e2b5b9fc5ae7a2fe40509e666aa993d775ac04",
-      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/32e2b5b9fc5a",
+      "worktree": "/workspace/.cache/deepinfer-lab/worktrees/32e2b5b9fc5a",
       "extra": [],
-      "harness": "/workspace/mdi-experiments/bench-rev-real4-c1/harness"
+      "harness": "/workspace/deepinfer-lab-experiments/bench-rev-real4-c1/harness"
     },
     {
       "rev": "perf/moe-combine",
       "sha": "5f5fb730728bc086ed06a486f22fe5340d559ba4",
-      "worktree": "/workspace/.cache/mini-deepinfer/worktrees/5f5fb730728b",
+      "worktree": "/workspace/.cache/deepinfer-lab/worktrees/5f5fb730728b",
       "extra": [],
-      "harness": "/workspace/mdi-experiments/bench-rev-real4-c1/harness"
+      "harness": "/workspace/deepinfer-lab-experiments/bench-rev-real4-c1/harness"
     }
   ]
 }

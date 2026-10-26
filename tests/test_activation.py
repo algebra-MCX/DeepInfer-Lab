@@ -4,7 +4,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from minideepinfer.models.deepseek_v41.model import swiglu_bf16
+from deepinfer_lab.models.deepseek_v41.model import swiglu_bf16
 
 
 def reference(gate, up, limit, weights=None):

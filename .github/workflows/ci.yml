@@ -29,7 +29,17 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install transformers triton safetensors tokenizers numpy huggingface_hub tqdm pytest
-          python -m pip install --no-deps -e .
+          python -m pip install --no-deps .
+      - name: Verify installed package
+        working-directory: ${{ runner.temp }}
+        run: |
+          python - <<'PY'
+          from importlib.metadata import version
+          from deepinfer_lab import LLM, SamplingParams
+
+          print("DeepInfer-Lab:", version("DeepInfer-Lab"))
+          print("Public API:", LLM.__name__, SamplingParams.__name__)
+          PY
       - name: Run CPU tests
         run: pytest -q -m "not gpu"
       - name: Verify GPU suite is collected
@@ -39,5 +49,5 @@ jobs:
           echo "GPU tests collected: $collected"
       - name: Compile and check whitespace
         run: |
-          python -m compileall -q minideepinfer tests
+          python -m compileall -q deepinfer_lab tests
           git diff --check

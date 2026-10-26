@@ -1,10 +1,10 @@
-# mini-DeepInfer 技术说明：从请求到 DeepSeek-V4.1
+# DeepInfer-Lab 技术说明：从请求到 DeepSeek-V4.1
 
-这份文档说明 mini-DeepInfer 如何把一个请求变成可复现的 V4.1 推理步骤。它对应当前仓库代码，重点是可以读懂、可以验证和可以改动的实现边界；它不是对 DeepInfer 生产集群性能的承诺。先阅读 [DeepInfer 风格的运行时设计](DEEPINFER_DESIGN.md)，了解官方设计与本项目的映射、step 数据契约和后续实现顺序，再阅读下面的代码导览。
+这份文档说明 DeepInfer-Lab 如何把一个请求变成可复现的 V4.1 推理步骤。它对应当前仓库代码，重点是可以读懂、可以验证和可以改动的实现边界；它不是对 DeepInfer 生产集群性能的承诺。先阅读 [DeepInfer 风格的运行时设计](DEEPINFER_DESIGN.md)，了解官方设计与本项目的映射、step 数据契约和后续实现顺序，再阅读下面的代码导览。
 
 ## 1. 范围与运行边界
 
-mini-DeepInfer 是单 GPU、纯 PyTorch 的教学型运行时，包含：
+DeepInfer-Lab 是单 GPU、纯 PyTorch 的教学型运行时，包含：
 
 - DeepSeek-V4.1 的压缩 KV、滑动窗口、两级稀疏 indexer、hyper-connections、Engram 和 MoE；
 - DeepInfer 风格的分页 KV block、每序列 state slot、连续批处理、chunked prefill、抢占和确定性采样；
@@ -14,7 +14,7 @@ mini-DeepInfer 是单 GPU、纯 PyTorch 的教学型运行时，包含：
 
 ## 2. 一次请求的生命周期
 
-入口在 `minideepinfer/entrypoints/llm.py`。`LLM.generate()` 为每个 prompt 创建 `Sequence`，交给 `LLMEngine`；每次 `step()` 都经历三个阶段：
+入口在 `deepinfer_lab/entrypoints/llm.py`。`LLM.generate()` 为每个 prompt 创建 `Sequence`，交给 `LLMEngine`；每次 `step()` 都经历三个阶段：
 
 1. `Scheduler.schedule()` 在 CPU 上决定本步是 prefill 还是 decode，并为序列预留 KV block 与 state slot；
 2. `ModelRunner.execute()` 将 batch、block table、位置和采样参数异步送入 GPU；
@@ -117,7 +117,7 @@ CPU:        process(N-1) -------------------------------> commit token
 运行完整检查：
 
 ```bash
-cd mini-DeepInfer
+cd DeepInfer-Lab
 pytest tests/test_block_manager.py tests/test_scheduler.py tests/test_sampler.py
 pytest
 ```
@@ -128,11 +128,11 @@ GPU 和官方 reference 测试需要可用的 CUDA 环境；没有 GPU 时应运
 
 | 目标 | 入口 |
 | --- | --- |
-| 改调度策略 | `minideepinfer/engine/scheduler.py` |
-| 改 block/slot 生命周期 | `minideepinfer/engine/block_manager.py`、`sequence.py` |
-| 改 ZOS batch 构造 | `minideepinfer/worker/model_runner.py` |
-| 改 V4.1 attention / MoE | `minideepinfer/models/deepseek_v41/model.py` |
-| 改低精度状态 | `minideepinfer/models/deepseek_v41/quant.py`、`weights.py` |
+| 改调度策略 | `deepinfer_lab/engine/scheduler.py` |
+| 改 block/slot 生命周期 | `deepinfer_lab/engine/block_manager.py`、`sequence.py` |
+| 改 ZOS batch 构造 | `deepinfer_lab/worker/model_runner.py` |
+| 改 V4.1 attention / MoE | `deepinfer_lab/models/deepseek_v41/model.py` |
+| 改低精度状态 | `deepinfer_lab/models/deepseek_v41/quant.py`、`weights.py` |
 | 改可复现实验 | `tests/`、`tools/v41_reference.py` |
 
 推荐的修改顺序是先写一个能暴露状态或调度差异的最小测试，再改实现，最后用 reference logits 和抢占/批组成变体回归。性能数字必须注明 GPU、checkpoint、batch、上下文长度、dtype 和是否包含 warm-up。

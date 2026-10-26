@@ -18,14 +18,14 @@ from dataclasses import dataclass, field
 import numpy as np
 import torch
 
-from minideepinfer.config import Config
-from minideepinfer.engine.scheduler import SchedulerOutput
-from minideepinfer.layers.sampler import Sampler, SamplingTensors, mix_seed
-from minideepinfer.models.deepseek_v41 import DeepseekV41
-from minideepinfer.models.deepseek_v41.model import V41Batch, V41Cache
-from minideepinfer.models.deepseek_v41.weights import iterate_raw
-from minideepinfer.sequence import Sequence
-from minideepinfer.worker.cuda_graph import DecodeGraphRunner
+from deepinfer_lab.config import Config
+from deepinfer_lab.engine.scheduler import SchedulerOutput
+from deepinfer_lab.layers.sampler import Sampler, SamplingTensors, mix_seed
+from deepinfer_lab.models.deepseek_v41 import DeepseekV41
+from deepinfer_lab.models.deepseek_v41.model import V41Batch, V41Cache
+from deepinfer_lab.models.deepseek_v41.weights import iterate_raw
+from deepinfer_lab.sequence import Sequence
+from deepinfer_lab.worker.cuda_graph import DecodeGraphRunner
 
 logger = logging.getLogger(__name__)
 

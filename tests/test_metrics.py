@@ -2,9 +2,9 @@
 
 import pytest
 
-from minideepinfer.metrics import RequestMetrics, summarize
-from minideepinfer.sampling_params import SamplingParams
-from minideepinfer.sequence import Sequence, SequenceStatus
+from deepinfer_lab.metrics import RequestMetrics, summarize
+from deepinfer_lab.sampling_params import SamplingParams
+from deepinfer_lab.sequence import Sequence, SequenceStatus
 from tests.test_scheduler import make_scheduler, make_seq, run
 
 

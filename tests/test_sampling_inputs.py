@@ -3,8 +3,8 @@
 import pytest
 import torch
 
-from minideepinfer.layers.sampler import Sampler, SamplingTensors
-from minideepinfer.worker.model_runner import _sampling_to_gpu
+from deepinfer_lab.layers.sampler import Sampler, SamplingTensors
+from deepinfer_lab.worker.model_runner import _sampling_to_gpu
 
 pytestmark = pytest.mark.gpu
 

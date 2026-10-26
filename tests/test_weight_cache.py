@@ -3,8 +3,8 @@
 import pytest
 import torch
 
-from minideepinfer.config import Config
-from minideepinfer.models.deepseek_v41.model import DeepseekV41, QuantLinear
+from deepinfer_lab.config import Config
+from deepinfer_lab.models.deepseek_v41.model import DeepseekV41, QuantLinear
 
 
 def model_weights():

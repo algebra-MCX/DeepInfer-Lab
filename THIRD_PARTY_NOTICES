@@ -1,6 +1,6 @@
-mini-DeepInfer is licensed under the Apache License 2.0 (see LICENSE).
+DeepInfer-Lab is licensed under the Apache License 2.0 (see LICENSE).
 
-Parts of minideepinfer/models/deepseek_v41/ (the model math, Engram hashing and checkpoint
+Parts of deepinfer_lab/models/deepseek_v41/ (the model math, Engram hashing and checkpoint
 dequantization) are adapted from DeepSeek's DeepSeek-V4.1 reference implementation, the
 inference/ folder of https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash, released under
 the following license:

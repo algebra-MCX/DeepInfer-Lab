@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from minideepinfer.models.deepseek_v41.model import Gate, GroupedExperts
+from deepinfer_lab.models.deepseek_v41.model import Gate, GroupedExperts
 
 pytestmark = pytest.mark.gpu
 
@@ -94,8 +94,8 @@ def test_views_share_storage_with_stacks():
 
 
 def test_chunked_dequant_matches_whole_stack(monkeypatch):
-    from minideepinfer.models.deepseek_v41 import model
-    from minideepinfer.models.deepseek_v41.weights import dequant_fp4
+    from deepinfer_lab.models.deepseek_v41 import model
+    from deepinfer_lab.models.deepseek_v41.weights import dequant_fp4
 
     experts = make_experts()
     whole = dequant_fp4(experts.w2_weight, experts.w2_scale).transpose(-2, -1)
@@ -106,7 +106,7 @@ def test_chunked_dequant_matches_whole_stack(monkeypatch):
 @pytest.mark.parametrize("T,k,dim", [(1, 1, 7), (5, 6, 1030), (300, 4, 128)])
 def test_combine_reads_only_local_rows_in_slot_order(T, k, dim):
     """Rows of non-local choices are never written by the GEMMs: poison them and expect no effect."""
-    from minideepinfer.models.deepseek_v41.moe import combine_cuda
+    from deepinfer_lab.models.deepseek_v41.moe import combine_cuda
 
     g = torch.Generator(device="cuda").manual_seed(T)
     order = torch.randperm(T * k, device="cuda", generator=g)

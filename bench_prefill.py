@@ -27,9 +27,9 @@ import torch
 import torch.distributed as dist
 from torch import nn
 
-from minideepinfer import LLM, SamplingParams
-from minideepinfer.models.deepseek_v41 import model as v41
-from minideepinfer.sequence import Sequence
+from deepinfer_lab import LLM, SamplingParams
+from deepinfer_lab.models.deepseek_v41 import model as v41
+from deepinfer_lab.sequence import Sequence
 from tools.benchmark_metrics import summarize_prefill_window
 
 parser = argparse.ArgumentParser()
@@ -200,7 +200,7 @@ def run_point(point: int) -> dict:
     while remaining_prefill_tokens() > 0:
         step(measure=True)
     result = {
-        "engine": "mini-deepinfer",
+        "engine": "deepinfer-lab",
         "model_name": "deepseek-ai/DeepSeek-V4.1-Flash",
         "ep_size": world_size,
         "dp_size": world_size,

@@ -18,13 +18,13 @@ import logging
 import random
 import time
 
-from minideepinfer.config import Config
-from minideepinfer.engine.block_manager import BlockManager
-from minideepinfer.engine.scheduler import Scheduler
-from minideepinfer.sampling_params import SamplingParams
-from minideepinfer.sequence import Sequence
-from minideepinfer.tokenizer import load_tokenizer
-from minideepinfer.worker.model_runner import ModelRunner, StepHandle
+from deepinfer_lab.config import Config
+from deepinfer_lab.engine.block_manager import BlockManager
+from deepinfer_lab.engine.scheduler import Scheduler
+from deepinfer_lab.sampling_params import SamplingParams
+from deepinfer_lab.sequence import Sequence
+from deepinfer_lab.tokenizer import load_tokenizer
+from deepinfer_lab.worker.model_runner import ModelRunner, StepHandle
 
 logger = logging.getLogger(__name__)
 

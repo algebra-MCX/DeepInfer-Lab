@@ -9,7 +9,7 @@ pytestmark = pytest.mark.gpu
 
 
 def test_forward_has_no_host_sync(monkeypatch):
-    from minideepinfer import LLM, SamplingParams
+    from deepinfer_lab import LLM, SamplingParams
 
     # Eager decode is checked here; captured graphs could not contain a sync in the first place.
     llm = LLM(

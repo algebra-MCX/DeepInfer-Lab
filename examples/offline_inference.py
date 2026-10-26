@@ -6,7 +6,7 @@ it exercises the full architecture but its text is meaningless. Pass `--model` t
 
 import argparse
 
-from minideepinfer import LLM, SamplingParams
+from deepinfer_lab import LLM, SamplingParams
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", default="tiny-random/deepseek-v4.1-flash-1017", help="HF model id or local checkpoint directory")
