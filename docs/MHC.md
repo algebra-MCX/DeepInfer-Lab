@@ -74,6 +74,26 @@ prenorm 系数的微小误差而出现不稳定的逐元素相对误差。端到
 能否导入，再运行全套测试。选择 `native` 可以只安装基础依赖；官方 mHC 专项用例此时可能
 skip。GPU runner 需要提前具备上述构建工具与系统头文件。
 
+### 首次完整验证：2026-11-24
+
+Slurm 作业 `25293`，代码 `dbf56e8`，在 1 × NVIDIA B200 上运行完整测试集：
+**207 passed，0 skipped，49.61 秒**；作业状态 `COMPLETED`，退出码 `0:0`。
+
+| 项目 | 配置 / 结果 |
+| --- | --- |
+| 驱动 / PyTorch / CUDA runtime | 620.70.06 / 2.14.1+cu130 / 13.0 |
+| TileKernels / DeepGEMM | 2.1.0 / 2.8.2+local，DeepGEMM 固定上述提交 |
+| 模型级 checkpoint | `tiny-random/deepseek-v4.1-flash-1017`，revision `f1e53ce93d527bd38bcfa795cce51014ec08d545` |
+| 模块级形状 | T = 0 / 1 / 7 / 35，D = 128 / 512 / 5120，HC = 4；BF16 residual、FP32 混合系数 |
+| 模型级检查 | eager、CUDA Graph、chunked prefill、抢占；参考轨迹逐位置 logits 误差 < 0.05 |
+| 其他检查 | Graph 更新输入与输出所有权、无 host sync、native 路径全部回归 |
+| CPU 与打包 | 44 项 CPU 测试、wheel 构建、锁文件检查及远程 CPU CI 通过 |
+
+另对迁移前 main（`23ccc4d`）的 native 实现做了 48 组 CPU 对照：HC = 1 / 3 / 4 / 8，
+T = 0 / 1 / 37，D = 33 / 128，Sinkhorn 迭代 1 / 20 次，mixes、pre、post 均逐位相同。
+该结果证明 native 路径的数学兼容性；本轮模型级验证使用 tiny 随机权重，不包含真实大模型的
+四卡吞吐测量。49.61 秒是测试集耗时，不是推理性能指标。
+
 上游接口依据：
 [TileKernels mHC](https://github.com/deepseek-ai/TileKernels/tree/c1cf914a82e6901c679445f872051ce44ac2cc63/tile_kernels/mhc)、
 [DeepGEMM prenorm GEMM](https://github.com/deepseek-ai/DeepGEMM/blob/5081f8513af57e61696de4f4f04b0e707ffb503e/csrc/apis/hyperconnection.hpp)。
