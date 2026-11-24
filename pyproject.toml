@@ -21,6 +21,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "sympy", "tilelang", "pillow"]  # the reference implementation used by tests/test_v41.py
+mhc = [
+    "tile-kernels==2.1.0; python_version >= '3.12'",
+    "deep-gemm @ git+https://github.com/deepseek-ai/DeepGEMM.git@5081f8513af57e61696de4f4f04b0e707ffb503e ; python_version >= '3.12'",
+]
 
 [tool.setuptools.packages.find]
 include = ["deepinfer_lab*"]

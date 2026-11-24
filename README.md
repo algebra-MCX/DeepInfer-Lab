@@ -229,6 +229,7 @@ print(outputs[0].token_ids)
 | `chunked_prefill`, `prefill_attempt_interval` | Prefill scheduling (DeepInfer's default interval is 70) |
 | `kv_cache_memory_gb` / `gpu_memory_utilization` | Cache budget: absolute, or a fraction of free memory |
 | `weight_cache_memory_gb` | BF16 weight-cache budget for non-expert FP8 projections, in GiB; `0` disables it by default |
+| `mhc_backend` | `native` (default) or `deepseek`; the latter uses official DeepGEMM + TileKernels mHC operators; see [migration notes](docs/MHC.md) |
 | `enable_zos` | Zero-overhead scheduling |
 | `SamplingParams(seq_seed=...)` | Same input + same seed = same output, whatever the batch |
 | `SamplingParams(stop_token_ids=...)` | Extra stop tokens; `LLMEngine.abort_request()` safely cancels an in-flight request |

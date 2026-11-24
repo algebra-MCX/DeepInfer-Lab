@@ -27,7 +27,7 @@ from deepinfer_lab.models.deepseek_v41.activation import swiglu_cuda
 from deepinfer_lab.models.deepseek_v41.attention import sparse_attention_cuda
 from deepinfer_lab.models.deepseek_v41.config import V41Config
 from deepinfer_lab.models.deepseek_v41.engram import EngramHasher
-from deepinfer_lab.models.deepseek_v41.hc import collapse_cuda, expand_cuda, split_sinkhorn_cuda
+from deepinfer_lab.models.deepseek_v41.mhc import get_mhc_backend, split_sinkhorn as hc_split_sinkhorn
 from deepinfer_lab.models.deepseek_v41.indexer import index_scores_cuda
 from deepinfer_lab.models.deepseek_v41.moe import combine_cuda
 from deepinfer_lab.models.deepseek_v41.norm import rms_norm_cuda
@@ -265,25 +265,6 @@ def select_candidate_blocks(
     top = blocks.topk(min(topk_blocks, blocks.size(-1)), dim=-1)
     keep = torch.zeros_like(blocks, dtype=torch.bool).scatter_(-1, top.indices, top.values > float("-inf"))
     return keep.repeat_interleave(block_size, dim=-1)[..., :width]
-
-
-def hc_split_sinkhorn(
-    mixes: torch.Tensor, scale: torch.Tensor, base: torch.Tensor, hc: int, iters: int, eps: float
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Splits hyper-connection mixes into pre / post weights and a doubly stochastic comb matrix."""
-    if mixes.is_cuda and iters >= 1 and all(
-        t.is_contiguous() and t.dtype == torch.float32 for t in (mixes, scale, base)
-    ):
-        return split_sinkhorn_cuda(mixes, scale, base, hc, iters, eps)
-    pre = torch.sigmoid(mixes[:, :hc] * scale[0] + base[:hc]) + eps
-    post = 2 * torch.sigmoid(mixes[:, hc : 2 * hc] * scale[1] + base[hc : 2 * hc])
-    comb = (mixes[:, 2 * hc :] * scale[2] + base[2 * hc :]).view(-1, hc, hc)
-    comb = comb.softmax(-1) + eps
-    comb = comb / (comb.sum(-2, keepdim=True) + eps)
-    for _ in range(iters - 1):
-        comb = comb / (comb.sum(-1, keepdim=True) + eps)
-        comb = comb / (comb.sum(-2, keepdim=True) + eps)
-    return pre, post, comb
 
 
 def linear(in_features: int, out_features: int, dtype: torch.dtype | None = None) -> nn.Linear:
@@ -747,9 +728,11 @@ class Block(nn.Module):
     Each sublayer's `hc_mixes` produce the collapse weights used by the *next* sublayer.
     """
 
-    def __init__(self, cfg: V41Config, layer_id: int, freqs: dict[str, torch.Tensor]) -> None:
+    def __init__(self, cfg: V41Config, layer_id: int, freqs: dict[str, torch.Tensor],
+                 mhc_backend: str = "native") -> None:
         super().__init__()
         self.cfg = cfg
+        self.mhc = get_mhc_backend(mhc_backend)
         self.attn = Attention(cfg, layer_id, freqs)
         self.ffn = MoE(cfg)
         self.engram = Engram(cfg, layer_id) if layer_id in cfg.engram_layer_ids else None
@@ -764,25 +747,15 @@ class Block(nn.Module):
     def hc_mixes(
         self, x: torch.Tensor, fn: torch.Tensor, scale: torch.Tensor, base: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        xf = x.flatten(1).float()
-        mixes = F.linear(xf, fn) * torch.rsqrt(xf.square().mean(-1, keepdim=True) + self.cfg.norm_eps)
-        return hc_split_sinkhorn(mixes, scale, base, self.cfg.hc_mult, self.cfg.hc_sinkhorn_iters, self.cfg.hc_eps)
+        return self.mhc.mixes(x, fn, scale, base, self.cfg.norm_eps, self.cfg.hc_sinkhorn_iters, self.cfg.hc_eps)
 
     @staticmethod
     def hc_pre(x: torch.Tensor, pre: torch.Tensor) -> torch.Tensor:
-        if (x.is_cuda and x.is_contiguous() and pre.is_contiguous()
-                and x.dtype == torch.bfloat16 and pre.dtype == torch.float32 and 0 < x.shape[1] <= 8):
-            return collapse_cuda(x, pre)
-        return (pre.unsqueeze(-1) * x.float()).sum(1).to(x.dtype)
+        return get_mhc_backend("native").pre(x, pre)
 
     @staticmethod
     def hc_post(x: torch.Tensor, residual: torch.Tensor, post: torch.Tensor, comb: torch.Tensor) -> torch.Tensor:
-        if (x.is_cuda and all(t.is_contiguous() for t in (x, residual, post, comb))
-                and x.dtype == residual.dtype == torch.bfloat16 and post.dtype == comb.dtype == torch.float32
-                and 0 < residual.shape[1] <= 8):
-            return expand_cuda(x, residual, post, comb)
-        y = post.unsqueeze(-1) * x.unsqueeze(-2) + (comb.unsqueeze(-1) * residual.unsqueeze(-2)).sum(1)
-        return y.type_as(x)
+        return get_mhc_backend("native").post(x, residual, post, comb)
 
     def forward(
         self, x: torch.Tensor, pre_mix: torch.Tensor, batch: V41Batch, cache: V41Cache, ctx: StepContext
@@ -790,21 +763,23 @@ class Block(nn.Module):
         """x [T, hc, dim] -> (x, collapse weights [T, hc] for the next block's attention)."""
         residual = x
         attn_pre, attn_post, attn_comb = self.hc_mixes(x, self.hc_attn_fn, self.hc_attn_scale, self.hc_attn_base)
-        h = self.attn(self.attn_norm(self.hc_pre(x, pre_mix)), batch, cache, ctx)
-        x = self.hc_post(h, residual, attn_post, attn_comb)
+        h = self.attn(self.attn_norm(self.mhc.pre(x, pre_mix)), batch, cache, ctx)
+        x = self.mhc.post(h, residual, attn_post, attn_comb)
 
         residual = x
         ffn_pre, ffn_post, ffn_comb = self.hc_mixes(x, self.hc_ffn_fn, self.hc_ffn_scale, self.hc_ffn_base)
-        h = self.ffn(self.ffn_norm(self.hc_pre(x, attn_pre)))
-        return self.hc_post(h, residual, ffn_post, ffn_comb), ffn_pre
+        h = self.ffn(self.ffn_norm(self.mhc.pre(x, attn_pre)))
+        return self.mhc.post(h, residual, ffn_post, ffn_comb), ffn_pre
 
 
 class DeepseekV41(nn.Module):
     """embed -> expand to hc_mult copies -> blocks -> collapse -> norm. Logits via `compute_logits`."""
 
-    def __init__(self, cfg: V41Config, max_positions: int, tokenizer_path: str) -> None:
+    def __init__(self, cfg: V41Config, max_positions: int, tokenizer_path: str,
+                 mhc_backend: str = "native") -> None:
         super().__init__()
         self.cfg = cfg
+        self.mhc = get_mhc_backend(mhc_backend)
         freqs = {
             # Sliding-window layers use plain RoPE; YaRN (original_seq_len > 0) applies to compressed layers only.
             "window": precompute_freqs_cis(cfg.rope_head_dim, max_positions, base=cfg.rope_theta),
@@ -820,7 +795,7 @@ class DeepseekV41(nn.Module):
         }
         freqs = {k: v.to(torch.get_default_device()) for k, v in freqs.items()}
         self.embed = nn.Embedding(cfg.vocab_size, cfg.dim)
-        self.layers = nn.ModuleList(Block(cfg, i, freqs) for i in range(cfg.n_layers))
+        self.layers = nn.ModuleList(Block(cfg, i, freqs, mhc_backend=mhc_backend) for i in range(cfg.n_layers))
         self.norm = RMSNorm(cfg.dim, cfg.norm_eps)
         self.head = nn.Parameter(torch.empty(cfg.vocab_size, cfg.dim, dtype=torch.float32))  # fp32 logits directly
         self.hasher = EngramHasher(cfg, tokenizer_path) if cfg.engram_layer_ids else None
@@ -831,14 +806,14 @@ class DeepseekV41(nn.Module):
         ring_rows = self.cache.window.shape[1] * self.cfg.window_size  # slots * window
         ctx = build_step_context(batch, self.cfg.window_size, ring_rows)
         hashes = self.hasher(batch.ngram_ids) if self.hasher is not None else None
-        h = self.embed(batch.input_ids).unsqueeze(1).repeat(1, self.cfg.hc_mult, 1)
+        h = self.mhc.expand(self.embed(batch.input_ids), self.cfg.hc_mult)
         pre_mix = torch.zeros(h.size(0), self.cfg.hc_mult, device=h.device)
         pre_mix[:, 0] = 1.0
         for layer in self.layers:
             if layer.engram is not None:
                 h = layer.engram(h, hashes)
             h, pre_mix = layer(h, pre_mix, batch, self.cache, ctx)
-        return self.norm(Block.hc_pre(h, pre_mix))
+        return self.norm(self.mhc.pre(h, pre_mix))
 
     def compute_logits(self, hidden: torch.Tensor) -> torch.Tensor:
         return F.linear(hidden.float(), self.head)

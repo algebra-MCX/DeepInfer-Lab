@@ -177,11 +177,21 @@ def test_engine_matches_reference(golden, kwargs):
         pytest.param({"enable_cuda_graph": False}, id="eager"),
         pytest.param({"max_num_batched_tokens": 200, "max_num_seqs": 2}, id="chunked-200-two-seqs"),
         pytest.param({"weight_cache_memory_gb": 0.02}, id="cached-weights"),
+        pytest.param({"mhc_backend": "deepseek"}, id="deepseek-mhc-graph"),
+        pytest.param({"mhc_backend": "deepseek", "enable_cuda_graph": False}, id="deepseek-mhc-eager"),
+        pytest.param({"mhc_backend": "deepseek", "max_num_batched_tokens": 200, "max_num_seqs": 2},
+                     id="deepseek-mhc-chunked"),
+        pytest.param({"mhc_backend": "deepseek", "num_gpu_blocks": 11}, id="deepseek-mhc-preemption"),
     ],
 )
 def test_engine_logits_on_reference_trajectory(golden, kwargs):
     """Compare every decode position, including those after an ambiguous reference top-2 margin."""
-    outputs, captured, _ = run_engine(golden, force_reference_tokens=True, **kwargs)
+    if kwargs.get("mhc_backend") == "deepseek":
+        pytest.importorskip("deep_gemm")
+        pytest.importorskip("tile_kernels")
+    outputs, captured, preempted = run_engine(golden, force_reference_tokens=True, **kwargs)
+    if kwargs.get("num_gpu_blocks") == 11:
+        assert preempted > 0
     for case, out, logits in zip(golden, outputs, captured, strict=True):
         assert out.token_ids == [int(step.argmax()) for step in case["logits"]]
         assert len(logits) == len(case["logits"]) == NUM_DECODE + 1

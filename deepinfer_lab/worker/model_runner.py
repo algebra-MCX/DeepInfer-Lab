@@ -89,7 +89,7 @@ class ModelRunner:
         default_dtype = torch.get_default_dtype()
         torch.set_default_dtype(config.dtype)
         with torch.device("cuda"):
-            self.model = DeepseekV41(cfg, config.max_model_len + 1, config.model_path)
+            self.model = DeepseekV41(cfg, config.max_model_len + 1, config.model_path, mhc_backend=config.mhc_backend)
         torch.set_default_dtype(default_dtype)
         self.model.load_weights(iterate_raw(config.model_path, self.model.checkpoint_select))
         self.model.eval()

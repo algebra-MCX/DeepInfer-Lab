@@ -8,9 +8,13 @@ from tests.conftest import MODEL
 pytestmark = pytest.mark.gpu
 
 
-def test_forward_has_no_host_sync(monkeypatch):
+@pytest.mark.parametrize("mhc_backend", ["native", "deepseek"])
+def test_forward_has_no_host_sync(monkeypatch, mhc_backend):
     from deepinfer_lab import LLM, SamplingParams
 
+    if mhc_backend == "deepseek":
+        pytest.importorskip("deep_gemm")
+        pytest.importorskip("tile_kernels")
     # Eager decode is checked here; captured graphs could not contain a sync in the first place.
     llm = LLM(
         MODEL,
@@ -19,6 +23,7 @@ def test_forward_has_no_host_sync(monkeypatch):
         max_num_batched_tokens=200,
         kv_cache_memory_gb=0.5,
         enable_cuda_graph=False,
+        mhc_backend=mhc_backend,
     )
     model = llm.llm_engine.model_runner.model
     forward, calls = model.forward, []

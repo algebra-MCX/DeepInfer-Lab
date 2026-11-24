@@ -38,6 +38,7 @@ class Config:
     gpu_memory_utilization: float = 0.5
     num_gpu_blocks: int = -1  # If > 0, overrides the block count (useful to force preemption).
     weight_cache_memory_gb: float = 0.0  # Optional bf16 cache for non-expert FP8 projections; 0 disables it.
+    mhc_backend: str = "native"  # 'deepseek' uses the optional DeepGEMM + TileKernels mHC chain.
     # Runtime.
     enable_zos: bool = True  # Zero-overhead scheduling: overlap CPU scheduling/post-processing with GPU work.
     enable_cuda_graph: bool = True  # Replay decode steps as captured CUDA graphs.
@@ -50,10 +51,16 @@ class Config:
     dtype: torch.dtype = field(init=False, default=torch.bfloat16)
 
     def __post_init__(self) -> None:
+        if self.mhc_backend not in ("native", "deepseek"):
+            raise ValueError("mhc_backend must be 'native' or 'deepseek'")
         if not math.isfinite(self.weight_cache_memory_gb) or self.weight_cache_memory_gb < 0:
             raise ValueError("weight_cache_memory_gb must be finite and nonnegative")
         self.model_path = resolve_model_path(self.model)
         self.model_config = V41Config.from_pretrained(self.model_path)
+        if self.mhc_backend == "deepseek" and (
+            self.model_config.hc_mult != 4 or self.model_config.dim <= 0 or self.model_config.dim % 128
+        ):
+            raise ValueError("DeepSeek mHC requires hc_mult=4 and hidden_size divisible by 128")
         if self.max_num_batched_tokens < self.block_size:
             raise ValueError("max_num_batched_tokens must be >= block_size")
         if not self.chunked_prefill and self.max_num_batched_tokens < self.max_model_len:
