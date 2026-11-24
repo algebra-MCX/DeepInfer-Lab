@@ -44,6 +44,7 @@ parser.add_argument("--result_jsonl", default=None)
 parser.add_argument("--workload_json", default=None, help="shared JSON[.gz] prompts, one full prompt per DP rank")
 parser.add_argument("--no_cuda_graph", action="store_true", help="skip decode graph capture for prefill-only comparisons")
 parser.add_argument("--max_model_len", type=int, default=None)
+parser.add_argument("--mhc_backend", choices=("native", "deepseek"), default="native")
 parser.add_argument("--profile_dir", default=None, help="trace PROFILE_STEPS steps after warm-up into this directory")
 args = parser.parse_args()
 
@@ -76,6 +77,7 @@ llm = LLM(
     max_model_len=args.max_model_len or args.context_length + 8,
     kv_cache_memory_gb=args.kv_cache_gb,
     enable_cuda_graph=not args.no_cuda_graph,
+    mhc_backend=args.mhc_backend,
 )
 engine = llm.llm_engine
 sched, bm, sm = engine.scheduler, engine.block_manager, engine.state_manager
@@ -216,6 +218,7 @@ def run_point(point: int) -> dict:
         "num_extra_experts": 0,
         "mtp_varlen": False,
         "enable_cuda_graph": not args.no_cuda_graph,
+        "mhc_backend": args.mhc_backend,
         **summarize_prefill_window(stable),
         "peak_memory_gib": torch.cuda.max_memory_allocated() / 2**30,
     }

@@ -210,6 +210,7 @@ print(outputs[0].token_ids)
 | `chunked_prefill`、`prefill_attempt_interval` | prefill 调度（DeepInfer 的默认间隔为 70） |
 | `kv_cache_memory_gb` / `gpu_memory_utilization` | 缓存预算：绝对值，或空闲显存的比例 |
 | `weight_cache_memory_gb` | 非专家 FP8 投影的 BF16 权重缓存上限，单位 GiB；默认 `0` 关闭 |
+| `mhc_backend` | `native`（默认）或 `deepseek`；后者接入官方 DeepGEMM + TileKernels mHC 算子，见[迁移说明](docs/MHC.md) |
 | `enable_zos` | 零开销调度 |
 | `SamplingParams(seq_seed=...)` | 相同输入 + 相同 seed = 相同输出，与 batch 组成无关 |
 | `SamplingParams(stop_token_ids=...)` | 额外的停止 token 集合；`LLMEngine.abort_request()` 可安全取消在途请求 |

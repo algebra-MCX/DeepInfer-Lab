@@ -183,6 +183,60 @@ nvtx = [
 ]
 
 [[package]]
+name = "deep-gemm"
+version = "2.8.2+local"
+source = { git = "https://github.com/deepseek-ai/DeepGEMM.git?rev=5081f8513af57e61696de4f4f04b0e707ffb503e#5081f8513af57e61696de4f4f04b0e707ffb503e" }
+
+[[package]]
+name = "deepinfer-lab"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "safetensors" },
+    { name = "tokenizers" },
+    { name = "torch" },
+    { name = "tqdm" },
+    { name = "transformers" },
+    { name = "triton" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pillow", version = "12.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pillow", version = "13.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pytest" },
+    { name = "sympy" },
+    { name = "tilelang" },
+]
+mhc = [
+    { name = "deep-gemm", marker = "python_full_version >= '3.12'" },
+    { name = "tile-kernels", marker = "python_full_version >= '3.12'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "deep-gemm", marker = "python_full_version >= '3.12' and extra == 'mhc'", git = "https://github.com/deepseek-ai/DeepGEMM.git?rev=5081f8513af57e61696de4f4f04b0e707ffb503e" },
+    { name = "huggingface-hub" },
+    { name = "numpy" },
+    { name = "pillow", marker = "extra == 'dev'" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "safetensors" },
+    { name = "sympy", marker = "extra == 'dev'" },
+    { name = "tile-kernels", marker = "python_full_version >= '3.12' and extra == 'mhc'", specifier = "==2.1.0" },
+    { name = "tilelang", marker = "extra == 'dev'" },
+    { name = "tokenizers" },
+    { name = "torch", specifier = ">=2.4" },
+    { name = "tqdm" },
+    { name = "transformers", specifier = ">=4.43" },
+    { name = "triton", specifier = ">=3.0" },
+]
+provides-extras = ["dev", "mhc"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -580,49 +634,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec9
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
 ]
-
-[[package]]
-name = "deepinfer-lab"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "huggingface-hub" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-    { name = "safetensors" },
-    { name = "tokenizers" },
-    { name = "torch" },
-    { name = "tqdm" },
-    { name = "transformers" },
-    { name = "triton" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pillow", version = "12.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pillow", version = "13.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pytest" },
-    { name = "sympy" },
-    { name = "tilelang" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "huggingface-hub" },
-    { name = "numpy" },
-    { name = "pillow", marker = "extra == 'dev'" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "safetensors" },
-    { name = "sympy", marker = "extra == 'dev'" },
-    { name = "tilelang", marker = "extra == 'dev'" },
-    { name = "tokenizers" },
-    { name = "torch", specifier = ">=2.4" },
-    { name = "tqdm" },
-    { name = "transformers", specifier = ">=4.43" },
-    { name = "triton", specifier = ">=3.0" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "ml-dtypes"
@@ -1647,6 +1658,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl", hash = "sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5", size = 6299353, upload-time = "2025-04-27T18:04:59.103Z" },
+]
+
+[[package]]
+name = "tile-kernels"
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tilelang" },
+    { name = "torch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/64/52/448b35742616cfea37486703f103f09e86d0680a8a7aa9da2bf66c5a2841/tile_kernels-2.1.0.tar.gz", hash = "sha256:7c35ba7d181577f669beb84e7ac763549262923719e96648cea6b0d88b2968ff", size = 225357, upload-time = "2026-10-14T06:24:54.387Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/64/9731e29c0b9d9c6a58a7e1f6353d4edbfc80591b9995f9026997fdab39c6/tile_kernels-2.1.0-py3-none-any.whl", hash = "sha256:df3ddffcf53ebc19404d2723bf2a629b46ce14cf4744a7739a80b0a9e366cf1f", size = 252693, upload-time = "2026-10-14T06:24:52.596Z" },
 ]
 
 [[package]]

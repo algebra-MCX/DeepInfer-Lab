@@ -29,6 +29,7 @@ parser.add_argument("--max-input-len", type=int, default=1024)
 parser.add_argument("--max-output-len", type=int, default=256)
 parser.add_argument("--kv-cache-gb", type=float, default=4.0)
 parser.add_argument("--weight-cache-gb", type=float, default=0.0, help="bf16 cache budget for non-expert FP8 weights")
+parser.add_argument("--mhc-backend", choices=("native", "deepseek"), default="native")
 parser.add_argument("--request-rate", type=float, default=float("inf"), help="Poisson arrival rate in requests/s")
 parser.add_argument("--ttft-slo", type=float, default=2.0, help="seconds")
 parser.add_argument("--tpot-slo", type=float, default=0.1, help="seconds")
@@ -46,7 +47,8 @@ arrivals = np.cumsum(gaps)
 
 startup_start = time.perf_counter()
 llm = LLM(args.model, max_num_seqs=args.num_seqs, max_model_len=4096, enable_zos=not args.no_zos,
-          kv_cache_memory_gb=args.kv_cache_gb, weight_cache_memory_gb=args.weight_cache_gb)
+          kv_cache_memory_gb=args.kv_cache_gb, weight_cache_memory_gb=args.weight_cache_gb,
+          mhc_backend=args.mhc_backend)
 llm.generate(prompt_token_ids=[[100] * 16], sampling_params=SamplingParams(max_tokens=8), use_tqdm=False)
 startup_s = time.perf_counter() - startup_start
 startup_memory = dict(allocated=torch.cuda.max_memory_allocated(), reserved=torch.cuda.max_memory_reserved())
@@ -94,7 +96,7 @@ if args.result_json:
         slurm_job_id=os.environ.get("SLURM_JOB_ID"), slurm_partition=os.environ.get("SLURM_JOB_PARTITION"),
         configuration={key: value for key, value in vars(args).items() if key != "result_json"},
         engine={key: getattr(engine.config, key) for key in (
-            "max_model_len", "max_num_seqs", "max_num_batched_tokens", "seed", "enable_zos", "enable_cuda_graph"
+            "max_model_len", "max_num_seqs", "max_num_batched_tokens", "seed", "enable_zos", "enable_cuda_graph", "mhc_backend"
         )},
         random_seed=0, python=platform.python_version(),
         packages={name: importlib.metadata.version(name) for name in (
