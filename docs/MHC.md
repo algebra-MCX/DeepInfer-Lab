@@ -65,6 +65,8 @@ pytest -q tests/test_mhc_backend.py tests/test_hc.py tests/test_hc_mixing.py tes
 CPU 测试覆盖归一化范围、矩阵方向、FP32 累加、pre-mix 传递和非法后端。
 GPU 测试比较完整官方算子链与参考实现，包含空 batch、单 token、不对齐的 token 数、
 真实 hidden size 5120、非连续输入、CUDA Graph 更新输入与旧输出所有权。
+系数与混合应用分别对照；整链另外要求相对 L2 误差不超过 0.5%，避免接近零的输出因
+prenorm 系数的微小误差而出现不稳定的逐元素相对误差。端到端 logits 容差仍为 0.05。
 `test_v41.py` 还对官方参考轨迹逐位置检查 logits，覆盖 eager、CUDA Graph、chunked prefill
 和抢占。缺少可选依赖会明确 skip；skipped 不代表官方后端已经验证。
 
